@@ -29,3 +29,6 @@ class StudyListApp(tk.Tk):
         self.study_frame = tk.Frame(self, bg="white", bd=2, relief=tk.RIDGE, width=300)  
         self.study_frame.pack(padx=20,pady=10, fill=tk.BOTH, expand=True, anchor="n") 
 
+        self.study_label = tk.Label(self.study_frame, text="T0D0:", font=("Cooper Black", 30), bg="white")  
+        self.study_label.pack(pady=5)
+
