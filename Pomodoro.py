@@ -15,3 +15,6 @@ class StudyListApp(tk.Tk):
         self.entry_frame = tk.Frame(self)
         self.entry_frame.pack(padx=20, pady=30, fill=tk.X)
 
+        self.new_task_entry = tk.Entry(self.entry_frame, font=("Times New Roman", 20), width=30)  
+        self.new_task_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
