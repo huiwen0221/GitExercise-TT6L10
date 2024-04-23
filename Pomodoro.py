@@ -12,3 +12,6 @@ class StudyListApp(tk.Tk):
         self.title_label = tk.Label(self, text="Study List", font=("Cooper Black", 50), bg="light yellow")  
         self.title_label.pack(pady=10)
 
+        self.entry_frame = tk.Frame(self)
+        self.entry_frame.pack(padx=20, pady=30, fill=tk.X)
+
