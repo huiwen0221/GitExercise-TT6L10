@@ -63,3 +63,8 @@ class StudyListApp(tk.Tk):
             due_date_label = tk.Label(due_date_frame, text=f"Due: {self.selected_date}", font=("Times New Roman", 8), bg="light blue")
             due_date_label.pack(padx=5, pady=2)
             
+            # Pack both task widget (checkbutton and due date label) into a tuple and store in task_widgets list
+            self.task_widgets.append((task_checkbutton, due_date_frame))
+            self.task_count += 1  # Increment task count
+            self.update_task_count_label()  # Update task count label
+            
