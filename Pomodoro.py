@@ -68,3 +68,8 @@ class StudyListApp(tk.Tk):
             self.task_count += 1  # Increment task count
             self.update_task_count_label()  # Update task count label
             
+            self.new_task_entry.delete(0, "end")
+            self.selected_date = None
+        else:
+            messagebox.showwarning("Warning", "Please enter a task and select its due date.")
+    
