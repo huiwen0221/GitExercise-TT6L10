@@ -24,3 +24,5 @@ class StudyListApp(tk.Tk):
         self.add_button = tk.Button(self.entry_frame, text="Add", command=self.add_task, font=("Times New Roman", 12), width=15, height=2, bg="white")  
         self.add_button.pack(side=tk.LEFT, padx=5)
 
+        self.selected_date = None
+
