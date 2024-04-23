@@ -56,3 +56,10 @@ class StudyListApp(tk.Tk):
             task_checkbutton.pack(anchor="w")
             task_checkbutton.var = tk.BooleanVar()  # Create a BooleanVar to track the state of the checkbox
             task_checkbutton.config(variable=task_checkbutton.var, command=lambda: self.mark_completed(task_checkbutton))
+
+            # Create a frame to hold the due date label with a box around it
+            due_date_frame = tk.Frame(self.study_frame, bd=1, relief=tk.SOLID, bg="light blue")
+            due_date_frame.pack(anchor="w", padx=20, pady=(0,5))
+            due_date_label = tk.Label(due_date_frame, text=f"Due: {self.selected_date}", font=("Times New Roman", 8), bg="light blue")
+            due_date_label.pack(padx=5, pady=2)
+            
