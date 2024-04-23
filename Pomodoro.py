@@ -18,3 +18,6 @@ class StudyListApp(tk.Tk):
         self.new_task_entry = tk.Entry(self.entry_frame, font=("Times New Roman", 20), width=30)  
         self.new_task_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
+        self.due_date_button = tk.Button(self.entry_frame, text="Select Due Date", command=self.select_due_date, font=("Times New Roman", 12), width=15, height=2, bg="white")  
+        self.due_date_button.pack(side=tk.LEFT, padx=(5,0))
+
