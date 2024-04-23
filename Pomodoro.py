@@ -37,9 +37,13 @@ class StudyListApp(tk.Tk):
         self.task_count_label = tk.Label(self.study_frame, text="Number of tasks: 0", font=("Times New Roman", 12), bg="white")
         self.task_count_label.pack(anchor="w", padx=20)
 
-        def select_due_date(self):
-           top = tk.Toplevel(self)
-           cal = Calendar(top, selectmode='day', date_pattern='yyyy-mm-dd', font=('Times New Roman', 10), bg="light yellow")  
-           cal.pack(pady=20, fill="both", expand=True)
-           confirm_button = tk.Button(top, text="Confirm", command=lambda: self.confirm_due_date(cal, top), font=("Times New Roman", 10), bg="light yellow")  
-           confirm_button.pack(pady=5)
+    def select_due_date(self):
+        top = tk.Toplevel(self)
+        cal = Calendar(top, selectmode='day', date_pattern='yyyy-mm-dd', font=('Times New Roman', 10), bg="light yellow")  
+        cal.pack(pady=20, fill="both", expand=True)
+        confirm_button = tk.Button(top, text="Confirm", command=lambda: self.confirm_due_date(cal, top), font=("Times New Roman", 10), bg="light yellow")  
+        confirm_button.pack(pady=5)
+
+    def confirm_due_date(self, cal, top):
+        self.selected_date = cal.get_date()
+        top.destroy()
