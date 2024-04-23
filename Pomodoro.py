@@ -88,3 +88,11 @@ class StudyListApp(tk.Tk):
                     break
         else:
             checkbutton.config(fg="black")  # Change text color back to black when task is incomplete
+
+    def update_task_count_label(self):
+        self.task_count_label.config(text=f"Number of tasks: {self.task_count}")
+
+# Create an instance of the StudyListApp class
+app = StudyListApp()
+# Start the tkinter event loop
+app.mainloop()
