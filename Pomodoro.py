@@ -47,3 +47,12 @@ class StudyListApp(tk.Tk):
     def confirm_due_date(self, cal, top):
         self.selected_date = cal.get_date()
         top.destroy()
+
+    def add_task(self):
+        new_task = self.new_task_entry.get()
+        if new_task and self.selected_date:
+            # Create a Checkbutton for the new task
+            task_checkbutton = tk.Checkbutton(self.study_frame, text=new_task, font=("Times New Roman", 20), bg="white")
+            task_checkbutton.pack(anchor="w")
+            task_checkbutton.var = tk.BooleanVar()  # Create a BooleanVar to track the state of the checkbox
+            task_checkbutton.config(variable=task_checkbutton.var, command=lambda: self.mark_completed(task_checkbutton))
