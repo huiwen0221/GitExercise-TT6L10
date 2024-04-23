@@ -73,3 +73,18 @@ class StudyListApp(tk.Tk):
         else:
             messagebox.showwarning("Warning", "Please enter a task and select its due date.")
     
+    def mark_completed(self, checkbutton):
+        if checkbutton.var.get():
+            checkbutton.config(fg="gray")  # Change text color to gray when task is completed
+            
+            # Remove the task checkbutton and its due date label from the GUI
+            for widget_tuple in self.task_widgets:
+                if widget_tuple[0] == checkbutton:  # Find the tuple containing the checkbutton
+                    checkbutton.destroy()
+                    widget_tuple[1].destroy()  # Destroy the associated due date frame
+                    self.task_widgets.remove(widget_tuple)  # Remove the tuple from the list
+                    self.task_count -= 1  # Decrement task count
+                    self.update_task_count_label()  # Update task count label
+                    break
+        else:
+            checkbutton.config(fg="black")  # Change text color back to black when task is incomplete
