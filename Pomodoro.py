@@ -32,3 +32,8 @@ class StudyListApp(tk.Tk):
         self.study_label = tk.Label(self.study_frame, text="T0D0:", font=("Cooper Black", 30), bg="white")  
         self.study_label.pack(pady=5)
 
+        self.task_widgets = []  # List to store task widgets (checkbutton and due date label)
+        self.task_count = 0  # Initialize task count to 0
+        self.task_count_label = tk.Label(self.study_frame, text="Number of tasks: 0", font=("Times New Roman", 12), bg="white")
+        self.task_count_label.pack(anchor="w", padx=20)
+
