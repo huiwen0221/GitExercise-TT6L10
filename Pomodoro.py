@@ -28,14 +28,18 @@ class StudyListApp(tk.Tk):
 
         self.study_frame = tk.Frame(self, bg="white", bd=2, relief=tk.RIDGE, width=300)  
         self.study_frame.pack(padx=20,pady=10, fill=tk.BOTH, expand=True, anchor="n") 
-
-        self.study_label = tk.Label(self.study_frame, text="T0D0:", font=("Cooper Black", 30), bg="white")  
+ 
+        self.study_label = tk.Label(self.study_frame, text="T0 D0:", font=("Cooper Black", 30), bg="white")  
         self.study_label.pack(pady=5)
 
         self.task_widgets = []  # List to store task widgets (checkbutton and due date label)
         self.task_count = 0  # Initialize task count to 0
         self.task_count_label = tk.Label(self.study_frame, text="Number of tasks: 0", font=("Times New Roman", 12), bg="white")
         self.task_count_label.pack(anchor="w", padx=20)
+
+        # Button to delete all tasks
+        self.delete_all_button = tk.Button(self, text="Delete Task", command=self.delete_all_tasks, font=("Times New Roman", 15), width=15, height=1, bg="white", fg="black")
+        self.delete_all_button.pack(pady=1, side=tk.BOTTOM)
 
     def select_due_date(self):
         top = tk.Toplevel(self)
@@ -51,13 +55,13 @@ class StudyListApp(tk.Tk):
     def add_task(self):
         new_task = self.new_task_entry.get()
         if new_task and self.selected_date:
-            # Create a Checkbutton for the new task
-            task_checkbutton = tk.Checkbutton(self.study_frame, text=new_task, font=("Times New Roman", 20), bg="white")
+            # Checkbutton for the new task
+            task_checkbutton = tk.Checkbutton(self.study_frame, text=new_task, font=("Arial", 20), bg="white")
             task_checkbutton.pack(anchor="w")
-            task_checkbutton.var = tk.BooleanVar()  # Create a BooleanVar to track the state of the checkbox
+            task_checkbutton.var = tk.BooleanVar()  # BooleanVar to track the state of the checkbox
             task_checkbutton.config(variable=task_checkbutton.var, command=lambda: self.mark_completed(task_checkbutton))
 
-            # Create a frame to hold the due date label with a box around it
+            # frame to hold the due date label with a box around it
             due_date_frame = tk.Frame(self.study_frame, bd=1, relief=tk.SOLID, bg="white")
             due_date_frame.pack(anchor="w", padx=20, pady=(0,5))
             due_date_label = tk.Label(due_date_frame, text=f"Due: {self.selected_date}", font=("Times New Roman", 8), bg="white")
@@ -76,18 +80,19 @@ class StudyListApp(tk.Tk):
     def mark_completed(self, checkbutton):
         if checkbutton.var.get():
             checkbutton.config(fg="gray")  # Change text color to gray when task is completed
-            
-            # Remove the task checkbutton and its due date label from the GUI
-            for widget_tuple in self.task_widgets:
-                if widget_tuple[0] == checkbutton:  # Find the tuple containing the checkbutton
-                    checkbutton.destroy()
-                    widget_tuple[1].destroy()  # Destroy the associated due date frame
-                    self.task_widgets.remove(widget_tuple)  # Remove the tuple from the list
-                    self.task_count -= 1  # Decrement task count
-                    self.update_task_count_label()  # Update task count label
-                    break
+            self.task_count -= 1  # Decrement task count
         else:
             checkbutton.config(fg="black")  # Change text color back to black when task is incomplete
+            self.task_count += 1  # Increment task count
+        self.update_task_count_label()  # Update task count label
+
+    def delete_all_tasks(self):
+        for widget_tuple in self.task_widgets:
+            widget_tuple[0].destroy()  # Destroy the checkbutton
+            widget_tuple[1].destroy()  # Destroy the due date frame
+        self.task_widgets = []  # Clear the list of task widgets
+        self.task_count = 0
+        self.update_task_count_label()
 
     def update_task_count_label(self):
         self.task_count_label.config(text=f"Number of tasks: {self.task_count}")
