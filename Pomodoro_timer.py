@@ -21,12 +21,12 @@ class PomodoroTimer:
         self.top_bar_frame.pack(fill=X)
 
 #Timer Label Design [CENTRE]
-        self.timer_lbl = Label(root, text = "25:00", font= ("Times", 66,), fg ="black", bg = "IndianRed")
+        self.timer_lbl = Label(root, text = "25:00", font= ("Times", 78,), fg ="black", bg = "IndianRed")
         self.timer_lbl.pack(pady=20)
         self.timer_lbl.place(relx=0.5, rely=0.4, anchor=CENTER)
 
 #Default Mode Timer Button [TOP CENTRE]
-        self.default_btn = Button(self.top_bar_frame, text = "Default", font=("Times, 16"), fg = "black",activebackground = "grey", command=self.default_timer )
+        self.default_btn = Button(self.top_bar_frame, text = "Timer", font=("Times, 16"), fg = "black",activebackground = "grey", command=self.default_timer )
         self.default_btn.pack(side=TOP, padx=5, pady=10, anchor=CENTER)
 
 #Start Button Design [BOTTOM]
