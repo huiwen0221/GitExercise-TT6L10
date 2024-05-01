@@ -1,6 +1,5 @@
 from tkinter import *
 
-
 class MasterBar:
     def __init__(self, root):
         super().__init__()
@@ -25,9 +24,6 @@ class MasterBar:
         def studylist_user():
             pass
 
-        def default_mode():
-           pass
-
         def study_mode():
             pass
 
@@ -43,10 +39,10 @@ class MasterBar:
 
         mode_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Mode", menu=mode_menu)
-        mode_menu.add_command(label="Default Mode", command=default_mode)
         mode_menu.add_command(label="Study Mode", command=study_mode)
         mode_menu.add_command(label="Relax Mode", command=relax_mode)
 
+        
 if __name__ == "__main__":
     root = Tk()
     app = MasterBar(root)
