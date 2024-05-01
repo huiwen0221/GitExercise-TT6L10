@@ -53,7 +53,7 @@ class StudyTimer:
         self.run_timer = FALSE #Timer not running
         self.start_timer = 0 #Initialized to 0
         self.pause_timer = FALSE #Timer isn't paused
-        self.timer_duration = 2700 #25mins * 60 seconds = 1500 seconds
+        self.timer_duration = 2700 #45mins * 60 seconds = 2700 seconds
         self.remaining_time = self.timer_duration #set as same value to show that entire duration is remaining
 
 #Default Timer Mode
