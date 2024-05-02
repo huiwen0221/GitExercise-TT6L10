@@ -13,41 +13,41 @@ class StudyTimer:
         self.root.configure(bg = "cornflowerblue")
 
 #Bottom Buttons Frame
-        self.frame = Frame(root, bg="cornflowerblue", height=50)
-        self.frame.pack(side=BOTTOM, fill=X)
+        self.study_bottom_frame = Frame(root, bg="cornflowerblue", height=50)
+        self.study_bottom_frame.pack(side=BOTTOM, fill=X)
         
 #Top Buttons Frame
-        self.top_bar_frame = Frame(root, bg="cornflowerblue")
-        self.top_bar_frame.pack(fill=X)
+        self.study_top_bar_frame = Frame(root, bg="cornflowerblue")
+        self.study_top_bar_frame.pack(fill=X)
 
 #Timer Label Design [CENTRE]
-        self.timer_lbl = Label(root, text = "45:00", font= ("Times", 78,), fg ="black", bg = "cornflowerblue")
-        self.timer_lbl.pack(pady=20)
-        self.timer_lbl.place(relx=0.5, rely=0.4, anchor=CENTER)
+        self.study_timer_lbl = Label(root, text = "45:00", font= ("Times", 78,), fg ="black", bg = "cornflowerblue")
+        self.study_timer_lbl.pack(pady=20)
+        self.study_timer_lbl.place(relx=0.5, rely=0.4, anchor=CENTER)
 
-#Default Mode Timer Button [TOP CENTRE]
-        self.default_btn = Button(self.top_bar_frame, text = "Timer", font=("Times, 16"), fg = "black",activebackground = "grey", command=self.default_timer )
-        self.default_btn.pack(side=TOP, padx=5, pady=10, anchor=CENTER)
+#Study Mode Timer Button [TOP CENTRE]
+        self.study_timer_btn = Button(self.study_top_bar_frame, text = "Timer", font=("Times, 16"), fg = "black",activebackground = "grey", command=self.default_timer )
+        self.study_timer_btn.pack(side=TOP, padx=5, pady=10, anchor=CENTER)
 
 #Start Button Design [BOTTOM]
-        self.start_btn = Button(self.frame,text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.start_time)
+        self.study_start_btn = Button(self.study_bottom_frame,text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.start_time)
         self.start_btn.pack(side=LEFT, expand=True, fill=X)
 
 #Stop Button Design [BOTTOM]
-        self.stop_btn = Button(self.frame, text = "Stop", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.pause_time)
-        self.stop_btn.pack(side=LEFT, expand=True, fill=X)
+        self.study_stop_btn = Button(self.study_bottom_frame, text = "Stop", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.pause_time)
+        self.study_stop_btn.pack(side=LEFT, expand=True, fill=X)
 
 #Reset Button Design [BOTTOM]
-        self.reset_btn = Button(self.frame, text = "Reset", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.reset_time)
-        self.reset_btn.pack(side=LEFT, expand=True, fill=X)
+        self.study_reset_btn = Button(self.study_bottom_frame, text = "Reset", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.reset_time)
+        self.study_reset_btn.pack(side=LEFT, expand=True, fill=X)
 
 #Short Break Button Design [BOTTOM]
-        self.shortbreak_btn = Button(self.frame, text = "Short Break", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.short_break )
-        self.shortbreak_btn.pack(side=LEFT, expand=True, fill=X)
+        self.study_shortbreak_btn = Button(self.study_bottom_frame, text = "Short Break", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.short_break )
+        self.study_shortbreak_btn.pack(side=LEFT, expand=True, fill=X)
 
 #Long Break Button Design [BOTTOM]
-        self.longbreak_btn = Button(self.frame, text = "Long Break", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.long_break)
-        self.longbreak_btn.pack(side=LEFT, expand=True, fill=X)
+        self.study_longbreak_btn = Button(self.study_bottom_frame, text = "Long Break", font= ("Times", 16), fg = "black", activebackground = "grey", command=self.long_break)
+        self.study_longbreak_btn.pack(side=LEFT, expand=True, fill=X)
 
 #Timer Variables (Original State)
         self.run_timer = FALSE #Timer not running
