@@ -26,21 +26,23 @@ class MasterBar:
         def studylist_user():
             pass
 
-    #Default Mode Option
+#Default Mode Option
         def default_mode():
             hide_frames()
             mode_default_frame.pack(fill = BOTH, expand = TRUE)
     
-    #Study Mode Option
+#Study Mode Option
         def study_mode():
             hide_frames()
             mode_study_frame.pack(fill = BOTH, expand = TRUE)
 
-    #Relax Mode Option
+#Relax Mode Option
         def relax_mode():
             hide_frames()
             mode_relax_frame.pack(fill = BOTH, expand = TRUE)
+            
 
+#Hide other frames when switching frames
         def hide_frames():
             mode_default_frame.pack_forget()
             mode_study_frame.pack_forget()
