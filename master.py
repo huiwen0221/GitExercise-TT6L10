@@ -41,7 +41,6 @@ class MasterBar:
             hide_frames()
             mode_relax_frame.pack(fill = BOTH, expand = TRUE)
             
-
 #Hide other frames when switching frames
         def hide_frames():
             mode_default_frame.pack_forget()
@@ -63,6 +62,11 @@ class MasterBar:
         mode_menu.add_command(label="Default Mode", command=default_mode)
         mode_menu.add_command(label="Study Mode", command=study_mode)
         mode_menu.add_command(label="Relax Mode", command=relax_mode)
+
+    #Settings Menu (Timer, Template, Sounds, Notification System)
+        setting_menu = Menu(menu_bar, tearoff = 0)
+        menu_bar.add_cascade(label="Settings",menu=setting_menu)
+
 
     #Frames for Mode (Default, Study, Relax)
         mode_default_frame = Frame(root, width= 700, height = 500, bg = "IndianRed")
