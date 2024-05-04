@@ -1,6 +1,7 @@
 from tkinter import *
 import time
 import winsound
+from Pomodoro_timer import PomodoroTimer
 
 class MasterBar:
     def __init__(self, root):
@@ -13,6 +14,8 @@ class MasterBar:
 
         menu_bar = Menu(root)
         root.configure(menu=menu_bar)
+
+        self.study_frame = PomodoroTimer(root)
         
         def user_data():
             pass
@@ -34,7 +37,7 @@ class MasterBar:
 #Study Mode Option
         def study_mode():
             hide_frames()
-            mode_study_frame.pack(fill = BOTH, expand = TRUE)
+            self.study_frame.pack(fill = BOTH, expand = TRUE)
 
 #Relax Mode Option
         def relax_mode():
