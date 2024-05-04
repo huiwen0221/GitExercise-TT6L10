@@ -2,26 +2,26 @@ from tkinter import *
 import time
 import winsound
 
-root = Tk()
+master_window = Tk()
 
 #Setting up Window's size and design by defining Class
 class StudyTimer:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Pomodoro Helper")
-        self.root.geometry("700x500")
-        self.root.configure(bg = "cornflowerblue")
+    def __init__(self, master_frame):
+        self.master_frame = master_frame
+        self.master_frame.title("Pomodoro Helper")
+        self.master_frame.geometry("700x500")
+        self.master_frame.configure(bg = "cornflowerblue")
 
 #Bottom Buttons Frame
-        self.study_bottom_frame = Frame(root, bg="cornflowerblue", height=50)
+        self.study_bottom_frame = Frame(master_frame, bg="cornflowerblue", height=50)
         self.study_bottom_frame.pack(side=BOTTOM, fill=X)
         
 #Top Buttons Frame
-        self.study_top_bar_frame = Frame(root, bg="cornflowerblue")
+        self.study_top_bar_frame = Frame(master_frame, bg="cornflowerblue")
         self.study_top_bar_frame.pack(fill=X)
 
 #Timer Label Design [CENTRE]
-        self.study_timer_lbl = Label(root, text = "45:00", font= ("Times", 78,), fg ="black", bg = "cornflowerblue")
+        self.study_timer_lbl = Label(master_frame, text = "45:00", font= ("Times", 78,), fg ="black", bg = "cornflowerblue")
         self.study_timer_lbl.pack(pady=20)
         self.study_timer_lbl.place(relx=0.5, rely=0.4, anchor=CENTER)
 
@@ -108,7 +108,7 @@ class StudyTimer:
 
             if self.study_remaining_time > 0:
                 self.study_start_timer = study_current_time
-                self.root.after(1000, self.study_update_time) #1000 = 1 second, updates after 1 second
+                self.master_frame.after(1000, self.study_update_time) #1000 = 1 second, updates after 1 second
             else: 
                 self.study_run_timer = False
                 self.study_alarm_sound()
@@ -125,5 +125,5 @@ class StudyTimer:
         winsound.PlaySound("default-timer-sound.wav", winsound.SND_FILENAME, winsound.SND_ASYNC)
             
 
-study_timer = StudyTimer(root)
-root.mainloop()
+study_timer = StudyTimer(master_window)
+master_window.mainloop()
