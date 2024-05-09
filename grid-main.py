@@ -25,6 +25,7 @@ class MainInterface:
         def studylist_user():
             pass
 
+#Change to Default Mode
         def switch_default_mode():
             root.config(bg="IndianRed")
             hide_frames()
@@ -38,6 +39,7 @@ class MainInterface:
             self.default_shortbreak_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
             self.default_longbreak_btn.grid(row =9 , column =8 , columnspan =2, sticky="nsew")
 
+#Change to Study Mode
         def study_mode():
             root.config(bg="Cornflowerblue")
             hide_frames()
@@ -49,7 +51,8 @@ class MainInterface:
             self.study_reset_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.study_shortbreak_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
             self.study_longbreak_btn.grid(row =9 , column =8 , columnspan =2, sticky="nsew")
-        
+
+#Change to Relax Mode
         def relax_mode():
             root.config(bg="mediumseagreen")
             hide_frames()
@@ -62,6 +65,7 @@ class MainInterface:
             self.relax_shortbreak_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
             self.relax_longbreak_btn.grid(row =9 , column =8 , columnspan =2, sticky="nsew")
 
+#Hide other mode buttons when switching mode
         def hide_frames():
             self.timer_lbl.grid_forget()
             self.default_timer_btn.grid_forget()
@@ -87,11 +91,12 @@ class MainInterface:
             self.relax_shortbreak_btn.grid_forget()
             self.relax_longbreak_btn.grid_forget()
 
+#Save Button Functionality
         def save_settings():
-            timer_duration = int(self.timer_entry.get()) *60
-            shortbreak_duration = int(self.shortbreak_entry.get()) * 60
-            longbreak_duration = int(self.longbreak_entry.get()) * 60
-            number_cycles = int(self.number_cycles_entry.get())
+            timer_duration = int(self.timer_entry.get()) *60 #entry for timer
+            shortbreak_duration = int(self.shortbreak_entry.get()) * 60 #entry for short break
+            longbreak_duration = int(self.longbreak_entry.get()) * 60 #entry for long break
+            number_cycles = int(self.number_cycles_entry.get()) #entry for number of repeated cycles
 
             self.default_timer_duration = timer_duration
             self.default_remaining_time = timer_duration
@@ -104,6 +109,22 @@ class MainInterface:
             self.update_default_display()
             self.cycles_lbl.config(text="Cycles: {}".format(number_cycles))
 
+#Reset All Entry Boxes and Revert to Original Default Mode
+        def reset_default_mode():
+            self.default_remaining_time = 1500
+            self.default_shortbreak_duration = 300
+            self.default_longbreak_duration = 900
+            self.update_default_display()
+
+            self.number_cycles=0
+            self.update_cycle_count_label()
+
+            self.timer_entry.delete(0,END)
+            self.shortbreak_entry.delete(0,END)
+            self.longbreak_entry.delete(0,END)
+            self.number_cycles_entry.delete(0,END)
+
+#Settings Window
         def open_settings():
             settings_window = Toplevel(root)
             settings_window.title("Settings")
@@ -145,6 +166,11 @@ class MainInterface:
             self.save_btn=Button(settings_window, text="Save", font=("Arial",25), bg="white", fg="black", command=save_settings)
             self.save_btn.grid(row=9,column=4,columnspan=2,sticky="nsew")
 
+        #RESET Settings Button
+            self.reset_all_btn=Button(settings_window, text="RESET TO ORIGINAL", font=("Arial",15), bg="red", fg="black", activebackground="red", command=reset_default_mode)
+            self.reset_all_btn.grid(row=9,column=9,columnspan=2,sticky="nsew")
+
+
         #Menu Taskbar
         menu_bar = Menu(root)
         root.config(menu=menu_bar)
@@ -165,13 +191,13 @@ class MainInterface:
         mode_menu.add_command(label="Study Mode", command=study_mode)
         mode_menu.add_command(label="Relax Mode", command=relax_mode)
 
-    #Settings Menu (Timer, Template, Sounds, Notification System)
+    #Settings Menu(Open new settings window)
         setting_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Settings",menu=setting_menu)
 
         setting_menu.add_command(label="Open", command=open_settings)
 
-    #Create buttons and label for Default Mode
+    #Default Mode Buttons and Label
         self.timer_lbl = Label(root, text = "25:00", font= ("Times", 100,), fg ="black", bg = "IndianRed")
         self.cycles_lbl = Label(root, text="Cycles Remaining: 0", font=("Times", 16), fg="black", bg="IndianRed")
 
@@ -182,7 +208,7 @@ class MainInterface:
         self.default_shortbreak_btn = Button(text = "Short Break", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.defaultmode_shortbreak)
         self.default_longbreak_btn = Button(text = "Long Break", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.defaultmode_longbreak)
 
-    #Create Study Mode Buttons and Label
+    #Study Mode Buttons and Label
         self.study_timer_lbl = Label(root, text = "45:00", font= ("Times", 100,), fg ="black", bg = "cornflowerblue")
 
         self.study_timer_btn = Button(text = "Timer", font=("Times, 16"), fg = "black",activebackground = "grey",command =self.studymode_timer)
@@ -218,7 +244,7 @@ class MainInterface:
         self.long_break_countdown = False
 
         self.number_cycles = 0  # Initialize number of cycles to zero
-        self.current_cycle = 0
+        self.current_cycle = 0  #Current cycles is zero
         self.update_cycle_count_label()
 
 
@@ -228,11 +254,13 @@ class MainInterface:
         self.reset_default_time()
 
     def defaultmode_shortbreak(self): #5 mins
+        self.default_shortbreak_duration = 300
         self.default_timer_duration = self.default_shortbreak_duration
         self.default_remaining_time = self.default_timer_duration
         self.start_countdown()
 
     def defaultmode_longbreak(self): #15 mins
+        self.default_longbreak_duration = 900
         self.default_timer_duration = self.default_longbreak_duration
         self.default_remaining_time = self.default_timer_duration
         self.start_countdown()
@@ -253,10 +281,11 @@ class MainInterface:
         self.default_remaining_time = self.default_timer_duration
         self.update_default_display()
 
+    #Updating the number of cycles label as it completes each round
     def update_cycle_count_label(self):
         self.cycles_lbl.config(text="Cycles: {}".format(self.number_cycles))
 
-
+    #Updating the timer, and the number of cycles each time it completes
     def update_default_time(self):
         if self.default_run_timer:
             current_time = time.time()
@@ -285,11 +314,12 @@ class MainInterface:
     # Function to start countdown for short break and long break
     def start_countdown(self):
         if not self.default_run_timer:  # Check if timer is not already running
-            if self.default_timer_duration == self.default_shortbreak_duration:
+            if self.default_timer_duration == self.default_shortbreak_duration: #countdown for short break
                 self.short_break_countdown = True
-            elif self.default_timer_duration == self.default_longbreak_duration:
+            elif self.default_timer_duration == self.default_longbreak_duration: #countdown for long break
                 self.long_break_countdown = True
             self.start_default_time()  # Start countdown
+
 
         # Study mode timer variables
         self.study_run_timer = False
@@ -298,17 +328,8 @@ class MainInterface:
         self.study_timer_duration = 2700
         self.study_remaining_time = self.study_timer_duration
 
-        # Relax mode timer variables
-        self.relax_run_timer = False
-        self.relax_start_timer = 0
-        self.relax_pause_timer = False
-        self.relax_timer_duration = 900
-        self.relax_remaining_time = self.relax_timer_duration
 
-
-
-
-##STUDY
+##STUDY MODE
     def studymode_timer(self): #45 mins
         self.study_timer_duration = 2700
         self.study_remaining_time = self.study_timer_duration
@@ -359,6 +380,13 @@ class MainInterface:
         seconds = int(self.study_remaining_time % 60)
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.study_timer_lbl.config(text=time_str)
+
+        # Relax mode timer variables
+        self.relax_run_timer = False
+        self.relax_start_timer = 0
+        self.relax_pause_timer = False
+        self.relax_timer_duration = 900
+        self.relax_remaining_time = self.relax_timer_duration
 
 ##RELAX
     def relaxmode_timer(self): #15 mins
