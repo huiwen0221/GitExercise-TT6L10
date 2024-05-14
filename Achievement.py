@@ -12,20 +12,24 @@ class PomodoroTimer:
         self.root.geometry("700x500")
         self.root.configure(bg="IndianRed")
         
-        self.timer_duration = 5  # Timer duration in seconds
+        self.timer_duration = 2  # Change to 2 seconds
         self.remaining_time = self.timer_duration
         self.run_timer = False
         self.start_timer = 0
         self.completed_sessions = 0  # Counter for completed sessions
         self.achievement_threshold1 = 2  # Number of sessions to achieve badge 1
         self.achievement_threshold2 = 3  # Number of sessions to achieve badge 2
+        self.achievement_threshold3 = 4  # Number of sessions to achieve badge 3
+        self.achievement_threshold4 = 5  # Number of sessions to achieve badge 4
+        self.sessions_with_2_sec = 0  # Counter for sessions with 2-second duration
+        self.sessions_with_3_sec = 0  # Counter for sessions with 3-second duration
+        self.sessions_with_4_sec = 0  # Counter for sessions with 4-second duration
         self.sessions_with_5_sec = 0  # Counter for sessions with 5-second duration
-        self.sessions_with_10_sec = 0  # Counter for sessions with 10-second duration
 
         self.create_widgets()
 
     def create_widgets(self):
-        self.timer_lbl = tk.Label(self.root, text="00:05", font=("Times", 180), fg="black", bg="IndianRed")
+        self.timer_lbl = tk.Label(self.root, text="00:02", font=("Times", 180), fg="black", bg="IndianRed")  # Change the text to "00:02"
         self.timer_lbl.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
         self.start_btn = tk.Button(self.root, text="Start", font=("Times", 16), fg="black", activebackground="grey", command=self.start_time, width=10, height=1)
@@ -40,7 +44,7 @@ class PomodoroTimer:
     def start_time(self):
         if not self.run_timer:
             self.run_timer = True
-            self.start_timer = time.time()
+            self.start_timer = time.perf_counter()
             self.update_time()
             self.start_btn.configure(state=tk.DISABLED)
             self.stop_btn.configure(state=tk.NORMAL)
@@ -53,8 +57,7 @@ class PomodoroTimer:
 
     def reset_time(self):
         self.run_timer = False
-        if self.completed_sessions >= self.achievement_threshold1:
-            self.timer_duration = 10  # Set timer duration to 10 seconds if badge 1 achieved
+        self.update_timer_duration()  # Update timer duration based on achievements
         self.remaining_time = self.timer_duration
         self.start_btn.configure(state=tk.NORMAL)
         self.stop_btn.configure(state=tk.DISABLED)
@@ -62,25 +65,18 @@ class PomodoroTimer:
 
     def update_time(self):
         if self.run_timer:
-            current_time = time.time()
+            current_time = time.perf_counter()
             time_passed = current_time - self.start_timer
             self.remaining_time = max(self.remaining_time - time_passed, 0)
             self.update_display()
 
             if self.remaining_time > 0:
                 self.start_timer = current_time
-                self.root.after(1000, self.update_time)
+                self.root.after(100, self.update_time)
             else:
                 self.run_timer = False
                 self.completed_sessions += 1  # Increment completed sessions
-                if self.timer_duration == 5:
-                    self.sessions_with_5_sec += 1
-                    if self.sessions_with_5_sec >= self.achievement_threshold1:
-                        self.achievement_unlocked(1)
-                elif self.timer_duration == 10:
-                    self.sessions_with_10_sec += 1
-                    if self.sessions_with_10_sec >= self.achievement_threshold2:
-                        self.achievement_unlocked(2)
+                self.check_achievements()
 
     def update_display(self):
         # Round up the remaining time to the nearest second
@@ -90,15 +86,52 @@ class PomodoroTimer:
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.timer_lbl.config(text=time_str)
 
+    def update_timer_duration(self):
+        # Check the current thresholds and update the timer duration
+        if self.sessions_with_2_sec >= self.achievement_threshold1:
+            self.timer_duration = 3  # Upgrade timer duration to 3 seconds if badge 1 achieved
+            self.sessions_with_2_sec = 0  # Reset the 2-second sessions counter
+        if self.sessions_with_3_sec >= self.achievement_threshold2:
+            self.timer_duration = 4  # Upgrade timer duration to 4 seconds if badge 2 achieved
+            self.sessions_with_3_sec = 0  # Reset the 3-second sessions counter
+        if self.sessions_with_4_sec >= self.achievement_threshold3:
+            self.timer_duration = 5  # Upgrade timer duration to 5 seconds if badge 3 achieved
+            self.sessions_with_4_sec = 0  # Reset the 4-second sessions counter
+        if self.sessions_with_5_sec >= self.achievement_threshold4:
+            self.timer_duration = 15  # Upgrade timer duration to 15 seconds if badge 4 achieved
+            self.sessions_with_5_sec = 0  # Reset the 5-second sessions counter
+
+    def check_achievements(self):
+        if self.timer_duration == 2:
+            self.sessions_with_2_sec += 1
+            if self.sessions_with_2_sec >= self.achievement_threshold1:
+                self.achievement_unlocked(1)
+        elif self.timer_duration == 3:
+            self.sessions_with_3_sec += 1
+            if self.sessions_with_3_sec >= self.achievement_threshold2:
+                self.achievement_unlocked(2)
+        elif self.timer_duration == 4:
+            self.sessions_with_4_sec += 1
+            if self.sessions_with_4_sec >= self.achievement_threshold3:
+                self.achievement_unlocked(3)
+        elif self.timer_duration == 5:
+            self.sessions_with_5_sec += 1
+            if self.sessions_with_5_sec >= self.achievement_threshold4:
+                self.achievement_unlocked(4)
+
     def achievement_unlocked(self, badge_num):
         winsound.Beep(440, 500)  # Beep sound to indicate achievement
         if badge_num == 1:
-            messagebox.showinfo("Achievement Unlocked!", "You've completed 2 sessions with 5 seconds!")
-            self.sessions_with_5_sec = 0
+            messagebox.showinfo("Achievement Unlocked!", "You've completed 2 sessions with 2 seconds!")
             self.display_badge(badge_num, "badge1.png")
         elif badge_num == 2:
-            messagebox.showinfo("Achievement Unlocked!", "You've completed 3 sessions with 10 seconds!")
-            self.sessions_with_10_sec = 0
+            messagebox.showinfo("Achievement Unlocked!", "You've completed 3 sessions with 3 seconds!")
+            self.display_badge(badge_num, "badge4.png")
+        elif badge_num == 3:
+            messagebox.showinfo("Achievement Unlocked!", "You've completed 4 sessions with 4 seconds!")
+            self.display_badge(badge_num, "badge3.png")
+        elif badge_num == 4:
+            messagebox.showinfo("Achivement Unlocked!", "You've completed 5 sessions with 5 seconds!")
             self.display_badge(badge_num, "badge2.png")
 
     def display_badge(self, badge_num, badge_path):
@@ -106,7 +139,7 @@ class PomodoroTimer:
         badge_window.title("Badge " + str(badge_num))
         
         # Open the image with Pillow
-        badge_image_pil = Image.open("badge1.png")
+        badge_image_pil = Image.open(badge_path)
         
         # Convert the image to a format usable by Tkinter
         badge_image_tk = ImageTk.PhotoImage(badge_image_pil)
@@ -119,3 +152,4 @@ class PomodoroTimer:
 root = tk.Tk()
 pomodoro_timer = PomodoroTimer(root)
 root.mainloop()
+
