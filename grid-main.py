@@ -120,11 +120,17 @@ class MainInterface:
             self.cycles_lbl.config(text="Cycles: 0")
 
             self.timer_entry.delete(0,END)
+            self.timer_entry.insert(0,"25")
             self.timerseconds_entry.delete(0, END)
+            self.timerseconds_entry.insert(0,"00")
             self.shortbreak_entry.delete(0,END)
+            self.shortbreak_entry.insert(0,"5")
             self.shortbreakseconds_entry.delete(0,END)
+            self.shortbreakseconds_entry.insert(0,"00")
             self.longbreak_entry.delete(0,END)
+            self.longbreak_entry.insert(0,"15")
             self.longbreakseconds_entry.delete(0,END)
+            self.longbreakseconds_entry.insert(0,"00")
             self.repeat_cycles_entry.delete(0,END)
 
 #Settings Window
@@ -300,26 +306,28 @@ class MainInterface:
 
     def start_cycle(self):
         if self.number_cycles > 0:
-            # Start the appropriate timer based on the current cycle
+            self.update_cycle_count_label()
             if self.current_cycle == 0:  # Timer phase
                 self.defaultmode_timer()
+                self.current_cycle += 1
             elif self.current_cycle == 1:  # Short break phase
                 self.defaultmode_shortbreak()
-            else:  # Long break phase
+                self.current_cycle += 1
+            elif self.current_cycle == 2:  # Long break phase
                 self.defaultmode_longbreak()
-
-            # Increment the current cycle number
-            self.current_cycle = (self.current_cycle + 1) % 3
-
-            # Decrement the number of cycles if one full cycle is completed
-            if self.current_cycle == 0:
+                self.current_cycle = 0  # Reset cycle for the next round
                 self.number_cycles -= 1
-            self.update_cycle_count_label()
+                self.update_cycle_count_label()
 
+            # If a full cycle (0 -> 1 -> 2 -> 0) is completed, decrement number_cycles
+
+            # Update the cycle count label after every phase
+            
         else:
-            # Reset current cycle when no cycles left
+            # Handle case when no cycles left
+            self.number_cycles = 0
             self.current_cycle = 0
-
+            self.update_cycle_count_label()
 
     #Updating the number of cycles label as it completes each round
     def update_cycle_count_label(self):
