@@ -84,10 +84,18 @@ class MainInterface:
 
 #Save Button Functionality
         def save_settings():
-            timer_duration = int(self.timer_entry.get()) *60 #entry for timer
-            shortbreak_duration = int(self.shortbreak_entry.get()) * 60 #entry for short break
-            longbreak_duration = int(self.longbreak_entry.get()) * 60 #entry for long break
-            repeat_cycles = int(self.repeat_cycles_entry.get()) #entry for number of repeated cycles
+            timer_minutes = int(self.timer_entry.get() or 0)  #entry for timer
+            timer_seconds = int(self.timerseconds_entry.get() or 0)
+            shortbreak_minutes = int(self.shortbreak_entry.get() or 0) #entry for short break
+            shortbreak_seconds = int(self.shortbreakseconds_entry.get() or 0)
+            longbreak_minutes = int(self.longbreak_entry.get() or 0) #entry for long break
+            longbreak_seconds = int(self.longbreakseconds_entry.get() or 0)
+            repeat_cycles = int(self.repeat_cycles_entry.get() or 0) #entry for number of repeated cycles
+
+            timer_duration = timer_minutes *60 + timer_seconds
+            shortbreak_duration = shortbreak_minutes *60 + shortbreak_seconds
+            longbreak_duration = longbreak_minutes *60 + longbreak_seconds
+
 
             self.default_timer_duration = timer_duration
             self.default_remaining_time = timer_duration
@@ -107,12 +115,22 @@ class MainInterface:
             self.default_longbreak_duration = 900
             self.update_default_display()
 
-            self.number_cycles=0
+            self.number_cycles= 0
             self.update_cycle_count_label()
+            self.cycles_lbl.config(text="Cycles: 0")
 
             self.timer_entry.delete(0,END)
+            self.timer_entry.insert(0,"25")
+            self.timerseconds_entry.delete(0, END)
+            self.timerseconds_entry.insert(0,"00")
             self.shortbreak_entry.delete(0,END)
+            self.shortbreak_entry.insert(0,"5")
+            self.shortbreakseconds_entry.delete(0,END)
+            self.shortbreakseconds_entry.insert(0,"00")
             self.longbreak_entry.delete(0,END)
+            self.longbreak_entry.insert(0,"15")
+            self.longbreakseconds_entry.delete(0,END)
+            self.longbreakseconds_entry.insert(0,"00")
             self.repeat_cycles_entry.delete(0,END)
 
 #Settings Window
@@ -130,11 +148,15 @@ class MainInterface:
             self.timer_settings_btn.grid(row = 0, column=0, sticky="nwes")
 
         #Timer Entry
-            self.timer_entry_lbl= Label(settings_window, text="Timer Duration (minutes):", font=("Arial",18), bg="gray", fg="black")
+            self.timer_entry_lbl= Label(settings_window, text="Timer Duration (minutes):(seconds)", font=("Arial",18), bg="gray", fg="black")
             self.timer_entry_lbl.grid(row = 0, column=1,columnspan=3)
             self.timer_entry = Entry(settings_window)
             self.timer_entry.grid(row = 0, column=4, columnspan=2, padx=10, pady=5)
             self.timer_entry.insert(0,"25")
+
+            self.timerseconds_entry = Entry(settings_window)
+            self.timerseconds_entry.grid(row = 0, column =7, columnspan =2, padx=10, pady=5)
+            self.timerseconds_entry.insert(0,"00")
 
         #Short Break Entry
             self.shortbreak_entry_lbl= Label(settings_window, text="Short Break Duration (minutes):", font=("Arial",18), bg="gray", fg="black")
@@ -143,12 +165,20 @@ class MainInterface:
             self.shortbreak_entry.grid(row = 1, column=4, columnspan=2, padx=10, pady=5)
             self.shortbreak_entry.insert(0,"5")
 
+            self.shortbreakseconds_entry = Entry(settings_window)
+            self.shortbreakseconds_entry.grid(row = 1, column = 7, columnspan=2, padx=10, pady=5)
+            self.shortbreakseconds_entry.insert(0, "00")
+
         #Long Break Entry
             self.longbreak_entry_lbl= Label(settings_window, text="Long Break Duration (minutes):", font=("Arial",18), bg="gray", fg="black")
             self.longbreak_entry_lbl.grid(row = 2, column=1, columnspan=3)
             self.longbreak_entry = Entry(settings_window)
             self.longbreak_entry.grid(row = 2, column=4, columnspan=2, padx=10, pady=5)
             self.longbreak_entry.insert(0,"15")
+
+            self.longbreakseconds_entry = Entry(settings_window)
+            self.longbreakseconds_entry.grid(row = 2, column=7, columnspan=2, padx=10, pady=5)
+            self.longbreakseconds_entry.insert(0, "00")
 
         #Repeat Cycles Entry
             self.repeat_cycles_lbl= Label(settings_window, text="Number of Cycles to Repeat:", font=("Arial",18), bg="gray", fg="black")
@@ -194,7 +224,7 @@ class MainInterface:
 
     #Default Mode Buttons and Label
         self.timer_lbl = Label(root, text = "25:00", font= ("Times", 100,), fg ="black", bg = "IndianRed")
-        self.cycles_lbl = Label(root, text="Cycles Remaining: 0", font=("Times", 16), fg="black", bg="IndianRed")
+        self.cycles_lbl = Label(root, text="Cycles:", font=("Times", 16), fg="black", bg="IndianRed")
 
 
         self.default_start_btn = Button(text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.start_default_time)
@@ -224,10 +254,10 @@ class MainInterface:
         self.default_run_timer = False
         self.default_start_timer = 0
         self.default_pause_timer = False
-        self.default_timer_duration = 1500
+        self.default_timer_duration = 5
         self.default_remaining_time = self.default_timer_duration
-        self.default_shortbreak_duration = 300  # Default short break duration in seconds
-        self.default_longbreak_duration = 900   # Default long break duration in seconds
+        self.default_shortbreak_duration = 10  # Default short break duration in seconds
+        self.default_longbreak_duration = 15   # Default long break duration in seconds
 
         self.timer_type = "default_timer"
 
@@ -274,6 +304,31 @@ class MainInterface:
             self.default_remaining_time = self.default_longbreak_duration
         self.update_default_display()
 
+    def start_cycle(self):
+        if self.number_cycles > 0:
+            self.update_cycle_count_label()
+            if self.current_cycle == 0:  # Timer phase
+                self.defaultmode_timer()
+                self.current_cycle += 1
+            elif self.current_cycle == 1:  # Short break phase
+                self.defaultmode_shortbreak()
+                self.current_cycle += 1
+            elif self.current_cycle == 2:  # Long break phase
+                self.defaultmode_longbreak()
+                self.current_cycle = 0  # Reset cycle for the next round
+                self.number_cycles -= 1
+                self.update_cycle_count_label()
+
+            # If a full cycle (0 -> 1 -> 2 -> 0) is completed, decrement number_cycles
+
+            # Update the cycle count label after every phase
+            
+        else:
+            # Handle case when no cycles left
+            self.number_cycles = 0
+            self.current_cycle = 0
+            self.update_cycle_count_label()
+
     #Updating the number of cycles label as it completes each round
     def update_cycle_count_label(self):
         self.cycles_lbl.config(text="Cycles: {}".format(self.number_cycles))
@@ -307,14 +362,15 @@ class MainInterface:
                     self.timer_type = "default_timer"
                     self.default_remaining_time = self.default_timer_duration
                     # Don't start the timer automatically, wait for user input
-                    return
 
                 # Update the display with the new timer type and remaining time
                 self.update_default_display()
                 # Automatically start the next timer (short break or long break), unless it's a study timer
                 if self.timer_type != "default_timer":
                     self.start_default_time()
-    
+                else:
+                    # Start a new cycle
+                    self.start_cycle()
 
     def update_default_display(self):
         minutes = int(self.default_remaining_time // 60)
@@ -322,7 +378,7 @@ class MainInterface:
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.timer_lbl.config(text=time_str)
 
-################################################################################################
+#################################################################################################################
 #STUDY#
 
 # Study mode timer variables
