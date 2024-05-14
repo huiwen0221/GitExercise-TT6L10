@@ -306,23 +306,25 @@ class MainInterface:
 
     def start_cycle(self):
         if self.number_cycles > 0:
-            self.update_cycle_count_label()
             if self.current_cycle == 0:  # Timer phase
-                self.defaultmode_timer()
-                self.current_cycle += 1
+                self.default_run_timer = True
+                self.default_start_timer = time.time()
+                self.update_default_time()
             elif self.current_cycle == 1:  # Short break phase
+                self.default_run_timer = False
                 self.defaultmode_shortbreak()
-                self.current_cycle += 1
             elif self.current_cycle == 2:  # Long break phase
+                self.default_run_timer = False
                 self.defaultmode_longbreak()
                 self.current_cycle = 0  # Reset cycle for the next round
                 self.number_cycles -= 1
                 self.update_cycle_count_label()
+                
+                if self.number_cycles > 0:
+                    self.start_cycle()
+                    self.number_cycles -= 1
+                    self.update_cycle_count_label()
 
-            # If a full cycle (0 -> 1 -> 2 -> 0) is completed, decrement number_cycles
-
-            # Update the cycle count label after every phase
-            
         else:
             # Handle case when no cycles left
             self.number_cycles = 0
