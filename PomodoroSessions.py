@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 
 #Create database for Pomodoro
-conn = sqlite3.connect('pomodoro.db')
+conn = sqlite3.connect('pomodorohelper.db')
 
 #Cursor
 cursor = conn.cursor ()

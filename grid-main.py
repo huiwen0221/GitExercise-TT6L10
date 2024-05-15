@@ -2,7 +2,6 @@ from tkinter import *
 import time
 import winsound
 
-
 class MainInterface:
     def __init__(self,root):
         self.root = root
