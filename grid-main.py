@@ -1,6 +1,7 @@
 from tkinter import *
 import time
 import winsound
+from PomodoroSessions import insert_pomodoro_session
 
 class MainInterface:
     def __init__(self,root):
@@ -573,6 +574,12 @@ class MainInterface:
 #Default Alarm Sound 
     def alarm_sound(self):
         winsound.PlaySound("default-timer-sound.wav", winsound.SND_FILENAME)
+
+    def complete_pomodoro_session(self, mode, timer_duration, short_break_duration, long_break_duration):
+        # Insert the completed timer session into the database
+        insert_pomodoro_session(mode, 'Timer', timer_duration)
+        insert_pomodoro_session(mode, 'Short Break', short_break_duration)
+        insert_pomodoro_session(mode, 'Long Break', long_break_duration)
 
 
 if __name__ == "__main__":
