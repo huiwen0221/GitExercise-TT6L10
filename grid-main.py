@@ -1,6 +1,10 @@
 from tkinter import *
 import time
 import winsound
+import sqlite3
+from datetime import datetime
+
+
 
 class MainInterface:
     def __init__(self,root):
@@ -12,6 +16,20 @@ class MainInterface:
         #Defining Grid 
         self.root.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
         self.root.rowconfigure((0,1,2,3,4,5,6,7,8,9), weight = 1, uniform='a')
+
+        # Create database for Pomodoro
+        self.conn = sqlite3.connect('pomodorohelper.db')
+        self.cursor = self.conn.cursor()
+
+        # Create Table if not exists
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS PomodoroSessions (
+            SessionID INTEGER PRIMARY KEY AUTOINCREMENT,
+            User TEXT NOT NULL,
+            Mode TEXT NOT NULL,
+            SessionType TEXT NOT NULL,
+            Duration INTEGER NOT NULL,
+            CompletionTime TEXT NOT NULL
+        );""")
 
         def user_data():
             pass
@@ -265,6 +283,15 @@ class MainInterface:
         self.current_cycle = 0  #Current cycles is zero
         self.update_cycle_count_label()
 
+    def complete_pomodoro_session(self, mode, timer_duration, short_break_duration, long_break_duration):
+        self.insert_pomodoro_session(mode, 'Timer', timer_duration)
+        if short_break_duration is not None:
+            self.insert_pomodoro_session(mode, 'Short Break', short_break_duration)
+        if long_break_duration is not None:
+            self.insert_pomodoro_session(mode, 'Long Break', long_break_duration)
+
+        self.print_pomodoro_sessions()
+
 
     def defaultmode_timer(self): #25 mins
         self.default_remaining_time = self.default_timer_duration
@@ -355,14 +382,17 @@ class MainInterface:
                     # Switch to short break
                     self.timer_type = "short_break"
                     self.default_remaining_time = self.default_shortbreak_duration
+                    self.complete_pomodoro_session("Default", self.default_shortbreak_duration, None, "Short Break")
                 elif self.timer_type == "short_break":
                     # Switch to long break
                     self.timer_type = "long_break"
                     self.default_remaining_time = self.default_longbreak_duration
+                    self.complete_pomodoro_session("Default", self.default_longbreak_duration, None, "Long Break")
                 else:
                     # Switch back to study timer
                     self.timer_type = "default_timer"
                     self.default_remaining_time = self.default_timer_duration
+                    self.complete_pomodoro_session("Default", self.default_timer_duration, None, "Timer")
                     # Don't start the timer automatically, wait for user input
 
                 # Update the display with the new timer type and remaining time
@@ -452,14 +482,17 @@ class MainInterface:
                     # Switch to short break
                     self.study_type = "study_shortbreak"
                     self.study_remaining_time = self.study_shortbreak_duration
+                    self.complete_pomodoro_session("Study", self.study_shortbreak_duration, None, "Short Break")
                 elif self.study_type == "study_shortbreak":
                     # Switch to long break
                     self.study_type = "study_longbreak"
                     self.default_remaining_time = self.study_longbreak_duration
+                    self.complete_pomodoro_session("Study", self.study_longbreak_duration, None, "Long Break")
                 else:
                     # Switch back to study timer
                     self.study_type = "study_timer"
                     self.study_remaining_time = self.study_timer_duration
+                    self.complete_pomodoro_session("Study", self.study_timer_duration, None, "Timer")
                     # Don't start the timer automatically, wait for user input
                     return
 
@@ -546,14 +579,18 @@ class MainInterface:
                     # Switch to short break
                     self.relax_type = "relax_shortbreak"
                     self.relax_remaining_time = self.relax_shortbreak_duration
+                    self.complete_pomodoro_session("Relax", self.relax_shortbreak_duration, None, "Short Break")
+
                 elif self.relax_type == "relax_shortbreak":
                     # Switch to long break
                     self.relax_type = "relax_longbreak"
                     self.relax_remaining_time = self.relax_longbreak_duration
+                    self.complete_pomodoro_session("Relax", self.relax_longbreak_duration, None, "Long Break")
                 else:
                     # Switch back to study timer
                     self.relax_type = "relax_timer"
                     self.relax_remaining_time = self.relax_timer_duration
+                    self.complete_pomodoro_session("Relax", self.default_timer_duration, None, "Timer")
                     # Don't start the timer automatically, wait for user input
                     return
 
@@ -573,6 +610,28 @@ class MainInterface:
 #Default Alarm Sound 
     def alarm_sound(self):
         winsound.PlaySound("default-timer-sound.wav", winsound.SND_FILENAME)
+    
+
+    def insert_pomodoro_session(self, mode, session_type, duration, user='John'):
+        completion_time = datetime.now().isoformat()  # Get the current completion time
+
+        # Execute the SQL query to insert the session into the table
+        self.cursor.execute('''
+        INSERT INTO PomodoroSessions (User, Mode, SessionType, Duration, CompletionTime)
+        VALUES (?, ?, ?, ?, ?)
+        ''', (user, mode, session_type, duration, completion_time))
+
+    def print_pomodoro_sessions(self):
+        # Execute a SELECT query to fetch data from the PomodoroSessions table
+        self.cursor.execute('SELECT * FROM PomodoroSessions')
+
+        # Fetch all the rows returned by the query
+        rows = self.cursor.fetchall()
+
+        # Print the fetched rows
+        for row in rows:
+            print(row)
+
 
 
 if __name__ == "__main__":
