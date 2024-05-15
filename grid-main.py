@@ -266,6 +266,12 @@ class MainInterface:
         self.current_cycle = 0  #Current cycles is zero
         self.update_cycle_count_label()
 
+    def complete_pomodoro_session(self, mode, timer_duration, short_break_duration, long_break_duration):
+        # Insert the completed timer session into the database
+        insert_pomodoro_session(mode, 'Timer', timer_duration)
+        insert_pomodoro_session(mode, 'Short Break', short_break_duration)
+        insert_pomodoro_session(mode, 'Long Break', long_break_duration)
+
 
     def defaultmode_timer(self): #25 mins
         self.default_remaining_time = self.default_timer_duration
@@ -356,14 +362,17 @@ class MainInterface:
                     # Switch to short break
                     self.timer_type = "short_break"
                     self.default_remaining_time = self.default_shortbreak_duration
+                    self.complete_pomodoro_session("Default", self.default_shortbreak_duration, "Short Break")
                 elif self.timer_type == "short_break":
                     # Switch to long break
                     self.timer_type = "long_break"
                     self.default_remaining_time = self.default_longbreak_duration
+                    self.complete_pomodoro_session("Default", self.default_longbreak_duration, "Long Break")
                 else:
                     # Switch back to study timer
                     self.timer_type = "default_timer"
                     self.default_remaining_time = self.default_timer_duration
+                    self.complete_pomodoro_session("Default", self.default_timer_duration, "Timer")
                     # Don't start the timer automatically, wait for user input
 
                 # Update the display with the new timer type and remaining time
@@ -453,14 +462,17 @@ class MainInterface:
                     # Switch to short break
                     self.study_type = "study_shortbreak"
                     self.study_remaining_time = self.study_shortbreak_duration
+                    self.complete_pomodoro_session("Study", self.study_shortbreak_duration, "Short Break")
                 elif self.study_type == "study_shortbreak":
                     # Switch to long break
                     self.study_type = "study_longbreak"
                     self.default_remaining_time = self.study_longbreak_duration
+                    self.complete_pomodoro_session("Study", self.study_longbreak_duration, "Long Break")
                 else:
                     # Switch back to study timer
                     self.study_type = "study_timer"
                     self.study_remaining_time = self.study_timer_duration
+                    self.complete_pomodoro_session("Study", self.study_timer_duration, "Timer")
                     # Don't start the timer automatically, wait for user input
                     return
 
@@ -547,14 +559,18 @@ class MainInterface:
                     # Switch to short break
                     self.relax_type = "relax_shortbreak"
                     self.relax_remaining_time = self.relax_shortbreak_duration
+                    self.complete_pomodoro_session("Relax", self.relax_shortbreak_duration, "Short Break")
+
                 elif self.relax_type == "relax_shortbreak":
                     # Switch to long break
                     self.relax_type = "relax_longbreak"
                     self.relax_remaining_time = self.relax_longbreak_duration
+                    self.complete_pomodoro_session("Relax", self.relax_longbreak_duration, "Long Break")
                 else:
                     # Switch back to study timer
                     self.relax_type = "relax_timer"
                     self.relax_remaining_time = self.relax_timer_duration
+                    self.complete_pomodoro_session("Relax", self.default_timer_duration, "Timer")
                     # Don't start the timer automatically, wait for user input
                     return
 
@@ -575,11 +591,7 @@ class MainInterface:
     def alarm_sound(self):
         winsound.PlaySound("default-timer-sound.wav", winsound.SND_FILENAME)
 
-    def complete_pomodoro_session(self, mode, timer_duration, short_break_duration, long_break_duration):
-        # Insert the completed timer session into the database
-        insert_pomodoro_session(mode, 'Timer', timer_duration)
-        insert_pomodoro_session(mode, 'Short Break', short_break_duration)
-        insert_pomodoro_session(mode, 'Long Break', long_break_duration)
+
 
 
 if __name__ == "__main__":
