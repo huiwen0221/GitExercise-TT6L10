@@ -15,7 +15,6 @@ class PomodoroTimer:
         self.timer_duration = 2  # Initial duration set to 2 seconds
         self.remaining_time = self.timer_duration
         self.run_timer = False
-        self.paused_timer = False
         self.start_timer = 0
         self.completed_sessions = 0  # Counter for completed sessions
         self.achievement_threshold1 = 2  # Number of sessions to achieve badge 1
@@ -49,50 +48,32 @@ class PomodoroTimer:
         self.stop_btn = tk.Button(btn_frame, text="Stop", font=("Times", 16), fg="black", activebackground="grey", command=self.pause_time, state=tk.DISABLED, width=10, height=1)
         self.stop_btn.grid(row=0, column=1, padx=10)
 
-        self.resume_btn = tk.Button(btn_frame, text="Resume", font=("Times", 16), fg="black", activebackground="grey", command=self.resume_time, state=tk.DISABLED, width=10, height=1)
-        self.resume_btn.grid(row=0, column=2, padx=10)
-
         self.reset_btn = tk.Button(btn_frame, text="Reset", font=("Times", 16), fg="black", activebackground="grey", command=self.reset_time, width=10, height=1)
-        self.reset_btn.grid(row=0, column=3, padx=10)
+        self.reset_btn.grid(row=0, column=2, padx=10)
 
         self.view_badges_btn = tk.Button(main_frame, text="View Badges", font=("Times", 16), fg="black", activebackground="grey", command=self.view_collected_badges, width=15, height=1)
         self.view_badges_btn.pack(pady=20)
 
     def start_time(self):
-        if not self.run_timer and not self.paused_timer:
+        if not self.run_timer:
             self.run_timer = True
             self.start_timer = time.perf_counter()
             self.update_time()
             self.start_btn.configure(state=tk.DISABLED)
             self.stop_btn.configure(state=tk.NORMAL)
-            self.resume_btn.configure(state=tk.DISABLED)
 
     def pause_time(self):
         if self.run_timer:
             self.run_timer = False
-            self.paused_timer = True
-            self.start_btn.configure(state=tk.DISABLED)
+            self.start_btn.configure(state=tk.NORMAL)
             self.stop_btn.configure(state=tk.DISABLED)
-            self.resume_btn.configure(state=tk.NORMAL)
-
-    def resume_time(self):
-        if not self.run_timer and self.paused_timer:
-            self.run_timer = True
-            self.paused_timer = False
-            self.start_timer = time.perf_counter()
-            self.update_time()
-            self.start_btn.configure(state=tk.DISABLED)
-            self.stop_btn.configure(state=tk.NORMAL)
-            self.resume_btn.configure(state=tk.DISABLED)
 
     def reset_time(self):
         self.run_timer = False
-        self.paused_timer = False
         self.update_timer_duration()  # Update timer duration based on achievements
         self.remaining_time = self.timer_duration
         self.start_btn.configure(state=tk.NORMAL)
         self.stop_btn.configure(state=tk.DISABLED)
-        self.resume_btn.configure(state=tk.DISABLED)
         self.update_display()
 
     def update_time(self):
@@ -185,17 +166,19 @@ class PomodoroTimer:
     def view_collected_badges(self):
         badges_window = tk.Toplevel(self.root)
         badges_window.title("Collected Badges")
-
-        if not self.collected_badges:
-            tk.Label(badges_window, text="No badges collected yet!", font=("Times", 16)).pack(pady=20)
-            return
-
-        for badge_path in self.collected_badges:
+        badges_window.geometry("400x300")
+        
+        for i, badge_path in enumerate(self.collected_badges):
+            # Open the image with Pillow
             badge_image_pil = Image.open(badge_path)
+            
+            # Convert the image to a format usable by Tkinter
             badge_image_tk = ImageTk.PhotoImage(badge_image_pil)
+            
+            # Create a label to display the image
             badge_label = tk.Label(badges_window, image=badge_image_tk)
             badge_label.image = badge_image_tk  # Keep reference to the image to prevent garbage collection
-            badge_label.pack(pady=10)
+            badge_label.grid(row=i // 2, column=i % 2, padx=10, pady=10)
 
 root = tk.Tk()
 pomodoro_timer = PomodoroTimer(root)
