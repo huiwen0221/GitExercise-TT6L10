@@ -36,13 +36,17 @@ class MainInterface:
             "Default Alarm": "Default Timer Alarm.wav",
             "Referee Whistle": "Study Referee Alarm.wav",
             "Chime": "Relax Chime Alarm.wav",
-            "Electronic Sequence": "Default SB.wav",
+            "Default Short Break": "Default SB.wav",
             "Churchbell": "Study Churchbell SB.wav",
             "Wind Chimes": "Relax WindChimes SB.wav",
-            "Microwave": "Default Microwave LB.wav",
+            "Default Microwave": "Default Microwave LB.wav",
             "Great Harp": "Study Great Harp LB.wav",
-            "Electronic Harp": "Relax Harp LB.wav"
+            "Relaxing Harp": "Relax Harp LB.wav"
         }
+
+        self.timer_end_sound = self.sound_files["Default Alarm"]
+        self.short_break_sound = self.sound_files["Default Short Break"]
+        self.long_break_sound = self.sound_files["Default Microwave"]
 
 
         def user_data():
@@ -138,6 +142,13 @@ class MainInterface:
             shortbreak_duration = shortbreak_minutes *60 + shortbreak_seconds
             longbreak_duration = longbreak_minutes *60 + longbreak_seconds
 
+            selected_timer_end_sound = self.alarm_sound_combobox.get()
+            selected_short_break_sound = self.SB_sound_combobox.get()
+            selected_long_break_sound = self.LB_sound_combobox.get()
+
+            self.timer_end_sound = self.sound_files[selected_timer_end_sound]
+            self.short_break_sound = self.sound_files[selected_short_break_sound]
+            self.long_break_sound = self.sound_files[selected_long_break_sound]
 
             self.default_timer_duration = timer_duration
             self.default_remaining_time = timer_duration
@@ -178,6 +189,14 @@ class MainInterface:
             root.configure(bg="IndianRed")
             self.timer_lbl.configure(bg="IndianRed")
             self.cycles_lbl.configure(bg="IndianRed")
+
+            self.alarm_sound_combobox.set("Default Alarm")
+            self.SB_sound_combobox.set("Default Short Break")
+            self.LB_sound_combobox.set("Default Microwave")
+
+            self.timer_end_sound = self.sound_files["Default Alarm"]
+            self.short_break_sound = self.sound_files["Default Short Break"]
+            self.long_break_sound = self.sound_files["Default Microwave"]
 
 #Settings Window
         def open_settings():
@@ -242,16 +261,14 @@ class MainInterface:
             self.reset_all_btn=Button(settings_window, text="RESET TO ORIGINAL", font=("Arial",15), bg="red", fg="black", activebackground="red", command=reset_default_mode)
             self.reset_all_btn.grid(row=9,column=9,columnspan=2,sticky="nsew")
 ##############################################################################################################
-            self.bg_color_btn = Button(settings_window, text="Background Color", font=("Arial",13), bg="white", fg="black", command=open_color)
-            self.bg_color_btn.grid(row=5, column=4, columnspan =2)
 
 #Sounds Settings
             self.sounds_entry_lbl= Label(settings_window, text="Sounds Options:", font=("Arial",18), bg="gray", fg="black")
             self.sounds_entry_lbl.grid(row = 4, column=1,columnspan=3)
 
             alarm_options = ["Default Alarm","Referee Whistle","Chime"]
-            SB_options = ["Electronic Sequence", "Churchbell", "Wind Chimes"]
-            LB_options = ["Microwave", "Great Harp", "Electronic Harp"]
+            SB_options = ["Default Short Break", "Churchbell", "Wind Chimes"]
+            LB_options = ["Default Microwave", "Great Harp", "Relaxing Harp"]
 
             self.alarm_sound_combobox = ttk.Combobox(settings_window, values=alarm_options, font=("Arial",13))
             self.alarm_sound_combobox.current(0)
@@ -264,6 +281,17 @@ class MainInterface:
             self.LB_sound_combobox = ttk.Combobox(settings_window, values=LB_options, font=("Arial",13))
             self.LB_sound_combobox.current(0)
             self.LB_sound_combobox.grid(row=4, column=8, columnspan=2)
+
+            self.alarm_sound_combobox.bind("<<ComboboxSelected>>")
+            self.SB_sound_combobox.bind("<<ComboboxSelected>>")
+            self.LB_sound_combobox.bind("<<ComboboxSelected>>")
+
+            self.selected_alarm_sound = "Default Alarm"
+            self.selected_SB_sound = "Default Short Break"
+            self.selected_LB_sound = "Default Microwave LB"
+
+            self.bg_color_btn = Button(settings_window, text="Background Color", font=("Arial",13), bg="white", fg="black", command=open_color)
+            self.bg_color_btn.grid(row=5, column=4, columnspan =2)
 
 
 #MENU Taskbar
@@ -429,7 +457,7 @@ class MainInterface:
             else:
                 # Timer has ended
                 self.default_run_timer = False
-                self.alarm_sound()
+                self.alarm_sound(self.timer_type)
 
                 if self.timer_type == "default_timer":
                     # Switch to short break
@@ -463,20 +491,16 @@ class MainInterface:
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.timer_lbl.config(text=time_str)
 
-    def play_sound(self, sound_type):
-        selected_sound = self.sound_files.get(sound_type, None)
-        if selected_sound:
-            winsound.PlaySound(selected_sound, winsound.SND_FILENAME)
+    def alarm_sound(self, timer_type):
+        if timer_type == "default_timer":
+            self.play_sound(self.timer_end_sound)
+        elif timer_type == "short_break":
+            self.play_sound(self.short_break_sound)
+        elif timer_type == "long_break":
+            self.play_sound(self.long_break_sound)
 
-    def alarm_sound(self, sound_type=None):
-        if sound_type == "default_timer":
-            winsound.PlaySound(self.selected_default_timer_sound, winsound.SND_FILENAME)
-        elif sound_type == "short_break":
-            winsound.PlaySound(self.default_short_break_sound, winsound.SND_FILENAME)
-        elif sound_type == "long_break":
-            winsound.PlaySound(self.default_long_break_sound, winsound.SND_FILENAME)
-
-
+    def play_sound(self, sound_file):
+        winsound.PlaySound(sound_file, winsound.SND_FILENAME)
 
 #################################################################################################################
 #STUDY#
