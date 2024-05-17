@@ -3,7 +3,8 @@ import time
 import winsound
 import sqlite3
 from datetime import datetime
-
+from tkinter import ttk
+from tkinter import colorchooser
 
 
 class MainInterface:
@@ -30,6 +31,23 @@ class MainInterface:
             Duration INTEGER NOT NULL,
             CompletionTime TEXT NOT NULL
         );""")
+
+        self.sound_files = {
+            "Default Alarm": "Default Timer Alarm.wav",
+            "Referee Whistle": "Study Referee Alarm.wav",
+            "Chime": "Relax Chime Alarm.wav",
+            "Default Short Break": "Default SB.wav",
+            "Churchbell": "Study Churchbell SB.wav",
+            "Wind Chimes": "Relax WindChimes SB.wav",
+            "Default Microwave": "Default Microwave LB.wav",
+            "Great Harp": "Study Great Harp LB.wav",
+            "Relaxing Harp": "Relax Harp LB.wav"
+        }
+
+        self.timer_end_sound = self.sound_files["Default Alarm"]
+        self.short_break_sound = self.sound_files["Default Short Break"]
+        self.long_break_sound = self.sound_files["Default Microwave"]
+
 
         def user_data():
             pass
@@ -98,6 +116,16 @@ class MainInterface:
             self.relax_start_btn.grid_forget()
             self.relax_stop_btn.grid_forget()
             self.relax_reset_btn.grid_forget()
+
+        def open_color():
+            # Open color picker dialog
+            color = colorchooser.askcolor(title="Choose Color")
+            if color[1]:  # If a color is selected
+                new_bg_color = color[1]  # Get the hexadecimal color code
+            # Update background color of specified elements
+            root.configure(bg=new_bg_color)
+            self.timer_lbl.configure(bg=new_bg_color)
+            self.cycles_lbl.configure(bg=new_bg_color)
  
 
 #Save Button Functionality
@@ -114,6 +142,13 @@ class MainInterface:
             shortbreak_duration = shortbreak_minutes *60 + shortbreak_seconds
             longbreak_duration = longbreak_minutes *60 + longbreak_seconds
 
+            selected_timer_end_sound = self.alarm_sound_combobox.get()
+            selected_short_break_sound = self.SB_sound_combobox.get()
+            selected_long_break_sound = self.LB_sound_combobox.get()
+
+            self.timer_end_sound = self.sound_files[selected_timer_end_sound]
+            self.short_break_sound = self.sound_files[selected_short_break_sound]
+            self.long_break_sound = self.sound_files[selected_long_break_sound]
 
             self.default_timer_duration = timer_duration
             self.default_remaining_time = timer_duration
@@ -151,6 +186,18 @@ class MainInterface:
             self.longbreakseconds_entry.insert(0,"00")
             self.repeat_cycles_entry.delete(0,END)
 
+            root.configure(bg="IndianRed")
+            self.timer_lbl.configure(bg="IndianRed")
+            self.cycles_lbl.configure(bg="IndianRed")
+
+            self.alarm_sound_combobox.set("Default Alarm")
+            self.SB_sound_combobox.set("Default Short Break")
+            self.LB_sound_combobox.set("Default Microwave")
+
+            self.timer_end_sound = self.sound_files["Default Alarm"]
+            self.short_break_sound = self.sound_files["Default Short Break"]
+            self.long_break_sound = self.sound_files["Default Microwave"]
+
 #Settings Window
         def open_settings():
             settings_window = Toplevel(root)
@@ -160,48 +207,49 @@ class MainInterface:
 
             settings_window.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
             settings_window.rowconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform='a')
+#####################################################################################################################
 
-        #Timer Settings Button
-            self.timer_settings_btn = Button(settings_window, text="Timer", font=("Times", 25), fg="black",activebackground="gray")
-            self.timer_settings_btn.grid(row = 0, column=0, sticky="nwes")
-
-        #Timer Entry
-            self.timer_entry_lbl= Label(settings_window, text="Timer Duration (minutes):(seconds)", font=("Arial",18), bg="gray", fg="black")
+#Timer Entry
+            self.timer_entry_lbl= Label(settings_window, text="Timer Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
             self.timer_entry_lbl.grid(row = 0, column=1,columnspan=3)
-            self.timer_entry = Entry(settings_window)
+
+            self.timer_entry = Entry(settings_window, font=("Arial",13))
             self.timer_entry.grid(row = 0, column=4, columnspan=2, padx=10, pady=5)
             self.timer_entry.insert(0,"25")
 
-            self.timerseconds_entry = Entry(settings_window)
+            self.timerseconds_entry = Entry(settings_window, font=("Arial",13))
             self.timerseconds_entry.grid(row = 0, column =7, columnspan =2, padx=10, pady=5)
             self.timerseconds_entry.insert(0,"00")
 
         #Short Break Entry
-            self.shortbreak_entry_lbl= Label(settings_window, text="Short Break Duration (minutes):", font=("Arial",18), bg="gray", fg="black")
+            self.shortbreak_entry_lbl= Label(settings_window, text="Short Break Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
             self.shortbreak_entry_lbl.grid(row = 1, column=1, columnspan=3)
-            self.shortbreak_entry = Entry(settings_window)
+
+            self.shortbreak_entry = Entry(settings_window, font=("Arial",13))
             self.shortbreak_entry.grid(row = 1, column=4, columnspan=2, padx=10, pady=5)
             self.shortbreak_entry.insert(0,"5")
 
-            self.shortbreakseconds_entry = Entry(settings_window)
+            self.shortbreakseconds_entry = Entry(settings_window, font=("Arial",13))
             self.shortbreakseconds_entry.grid(row = 1, column = 7, columnspan=2, padx=10, pady=5)
             self.shortbreakseconds_entry.insert(0, "00")
 
         #Long Break Entry
-            self.longbreak_entry_lbl= Label(settings_window, text="Long Break Duration (minutes):", font=("Arial",18), bg="gray", fg="black")
+            self.longbreak_entry_lbl= Label(settings_window, text="Long Break Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
             self.longbreak_entry_lbl.grid(row = 2, column=1, columnspan=3)
-            self.longbreak_entry = Entry(settings_window)
+
+            self.longbreak_entry = Entry(settings_window, font=("Arial",13))
             self.longbreak_entry.grid(row = 2, column=4, columnspan=2, padx=10, pady=5)
             self.longbreak_entry.insert(0,"15")
 
-            self.longbreakseconds_entry = Entry(settings_window)
+            self.longbreakseconds_entry = Entry(settings_window, font=("Arial",13))
             self.longbreakseconds_entry.grid(row = 2, column=7, columnspan=2, padx=10, pady=5)
             self.longbreakseconds_entry.insert(0, "00")
 
         #Repeat Cycles Entry
             self.repeat_cycles_lbl= Label(settings_window, text="Number of Cycles to Repeat:", font=("Arial",18), bg="gray", fg="black")
             self.repeat_cycles_lbl.grid(row = 3, column=1, columnspan=3)
-            self.repeat_cycles_entry = Entry(settings_window)
+
+            self.repeat_cycles_entry = Entry(settings_window, font=("Arial",13))
             self.repeat_cycles_entry.grid(row = 3, column=4, columnspan=2, padx=10, pady=5)
 
 
@@ -212,9 +260,41 @@ class MainInterface:
         #RESET Settings Button
             self.reset_all_btn=Button(settings_window, text="RESET TO ORIGINAL", font=("Arial",15), bg="red", fg="black", activebackground="red", command=reset_default_mode)
             self.reset_all_btn.grid(row=9,column=9,columnspan=2,sticky="nsew")
+##############################################################################################################
+
+#Sounds Settings
+            self.sounds_entry_lbl= Label(settings_window, text="Sounds Options:", font=("Arial",18), bg="gray", fg="black")
+            self.sounds_entry_lbl.grid(row = 4, column=1,columnspan=3)
+
+            alarm_options = ["Default Alarm","Referee Whistle","Chime"]
+            SB_options = ["Default Short Break", "Churchbell", "Wind Chimes"]
+            LB_options = ["Default Microwave", "Great Harp", "Relaxing Harp"]
+
+            self.alarm_sound_combobox = ttk.Combobox(settings_window, values=alarm_options, font=("Arial",13))
+            self.alarm_sound_combobox.current(0)
+            self.alarm_sound_combobox.grid(row=4, column=4, columnspan=2)
+
+            self.SB_sound_combobox = ttk.Combobox(settings_window, values=SB_options, font=("Arial",13))
+            self.SB_sound_combobox.current(0)
+            self.SB_sound_combobox.grid(row=4, column=6, columnspan=2)
+
+            self.LB_sound_combobox = ttk.Combobox(settings_window, values=LB_options, font=("Arial",13))
+            self.LB_sound_combobox.current(0)
+            self.LB_sound_combobox.grid(row=4, column=8, columnspan=2)
+
+            self.alarm_sound_combobox.bind("<<ComboboxSelected>>")
+            self.SB_sound_combobox.bind("<<ComboboxSelected>>")
+            self.LB_sound_combobox.bind("<<ComboboxSelected>>")
+
+            self.selected_alarm_sound = "Default Alarm"
+            self.selected_SB_sound = "Default Short Break"
+            self.selected_LB_sound = "Default Microwave LB"
+
+            self.bg_color_btn = Button(settings_window, text="Background Color", font=("Arial",13), bg="white", fg="black", command=open_color)
+            self.bg_color_btn.grid(row=5, column=4, columnspan =2)
 
 
-        #Menu Taskbar
+#MENU Taskbar
         menu_bar = Menu(root)
         root.config(menu=menu_bar)
 
@@ -272,12 +352,16 @@ class MainInterface:
         self.default_run_timer = False
         self.default_start_timer = 0
         self.default_pause_timer = False
-        self.default_timer_duration = 5
+        self.default_timer_duration = 1500
         self.default_remaining_time = self.default_timer_duration
-        self.default_shortbreak_duration = 10  # Default short break duration in seconds
-        self.default_longbreak_duration = 15   # Default long break duration in seconds
+        self.default_shortbreak_duration = 300  # Default short break duration in seconds
+        self.default_longbreak_duration = 900   # Default long break duration in seconds
 
         self.timer_type = "default_timer"
+
+        self.default_timer_sound = "Default Timer Alarm.wav"
+        self.default_short_break_sound = "Default SB.wav"
+        self.default_long_break_sound = "Default Microwave LB.wav"
 
         self.number_cycles = 0  # Initialize number of cycles to zero
         self.current_cycle = 0  #Current cycles is zero
@@ -289,9 +373,6 @@ class MainInterface:
             self.insert_pomodoro_session(mode, 'Short Break', short_break_duration)
         if long_break_duration is not None:
             self.insert_pomodoro_session(mode, 'Long Break', long_break_duration)
-
-        self.print_pomodoro_sessions()
-
 
     def defaultmode_timer(self): #25 mins
         self.default_remaining_time = self.default_timer_duration
@@ -376,7 +457,7 @@ class MainInterface:
             else:
                 # Timer has ended
                 self.default_run_timer = False
-                self.alarm_sound()
+                self.alarm_sound(self.timer_type)
 
                 if self.timer_type == "default_timer":
                     # Switch to short break
@@ -409,6 +490,17 @@ class MainInterface:
         seconds = int(self.default_remaining_time % 60)
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.timer_lbl.config(text=time_str)
+
+    def alarm_sound(self, timer_type):
+        if timer_type == "default_timer":
+            self.play_sound(self.timer_end_sound)
+        elif timer_type == "short_break":
+            self.play_sound(self.short_break_sound)
+        elif timer_type == "long_break":
+            self.play_sound(self.long_break_sound)
+
+    def play_sound(self, sound_file):
+        winsound.PlaySound(sound_file, winsound.SND_FILENAME)
 
 #################################################################################################################
 #STUDY#
@@ -476,7 +568,7 @@ class MainInterface:
                 self.root.after(1000, self.update_study_time)
             else:
                 self.study_run_timer = False
-                self.alarm_sound()
+                self.alarm_sound2()
 
                 if self.study_type == "study_timer":
                     # Switch to short break
@@ -507,6 +599,14 @@ class MainInterface:
         seconds = int(self.study_remaining_time % 60)
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.study_timer_lbl.config(text=time_str)
+
+    def alarm_sound2(self, sound_type="study_timer"):
+        if sound_type == "study_timer":
+            winsound.PlaySound("Study Referee Alarm.wav", winsound.SND_FILENAME)
+        elif sound_type == "study_shortbreak":
+            winsound.PlaySound("Study Churchbell SB.wav", winsound.SND_FILENAME)
+        elif sound_type == "study_longbreak":
+            winsound.PlaySound("Study Great Harp LB.wav", winsound.SND_FILENAME)
 
 #########################################################################################################33
 #RELAX#
@@ -573,7 +673,7 @@ class MainInterface:
                 self.root.after(1000, self.update_relax_time)
             else:
                 self.relax_run_timer = False
-                self.alarm_sound()
+                self.alarm_sound3()
 
                 if self.relax_type == "relax_timer":
                     # Switch to short break
@@ -607,9 +707,13 @@ class MainInterface:
         self.relax_timer_lbl.config(text=time_str)
 
 
-#Default Alarm Sound 
-    def alarm_sound(self):
-        winsound.PlaySound("default-timer-sound.wav", winsound.SND_FILENAME)
+    def alarm_sound3(self, sound_type="relax_timer"):
+        if sound_type == "relax_timer":
+            winsound.PlaySound("Relax Chime Alarm.wav", winsound.SND_FILENAME)
+        elif sound_type == "relax_shortbreak":
+            winsound.PlaySound("Relax Windchimes SB.wav", winsound.SND_FILENAME)
+        elif sound_type == "relax_longbreak":
+            winsound.PlaySound("Relax Harp LB.wav", winsound.SND_FILENAME)
     
 
     def insert_pomodoro_session(self, mode, session_type, duration, user='John'):
@@ -620,18 +724,6 @@ class MainInterface:
         INSERT INTO PomodoroSessions (User, Mode, SessionType, Duration, CompletionTime)
         VALUES (?, ?, ?, ?, ?)
         ''', (user, mode, session_type, duration, completion_time))
-
-    def print_pomodoro_sessions(self):
-        # Execute a SELECT query to fetch data from the PomodoroSessions table
-        self.cursor.execute('SELECT * FROM PomodoroSessions')
-
-        # Fetch all the rows returned by the query
-        rows = self.cursor.fetchall()
-
-        # Print the fetched rows
-        for row in rows:
-            print(row)
-
 
 
 if __name__ == "__main__":
