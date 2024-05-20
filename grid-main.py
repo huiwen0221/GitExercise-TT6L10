@@ -14,6 +14,7 @@ class MainInterface:
         self.root.geometry("700x500")
         self.root.configure(bg = "IndianRed")
 
+
         #Defining Grid 
         self.root.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
         self.root.rowconfigure((0,1,2,3,4,5,6,7,8,9), weight = 1, uniform='a')
@@ -48,6 +49,30 @@ class MainInterface:
         self.short_break_sound = self.sound_files["Default Short Break"]
         self.long_break_sound = self.sound_files["Default Microwave"]
 
+        self.study_run_timer = False
+        self.study_start_timer = 0
+        self.study_pause_timer = False
+        self.study_timer_duration = 2700
+        self.study_remaining_time = self.study_timer_duration
+        self.study_shortbreak_duration = 900
+        self.study_longbreak_duration = 1500
+
+        self.study_type = "study_timer"
+        self.study_cycle_count = 0
+
+################
+        # Relax mode timer variables
+        self.relax_run_timer = False
+        self.relax_start_timer = 0
+        self.relax_pause_timer = False
+        self.relax_timer_duration = 900
+        self.relax_remaining_time = self.relax_timer_duration
+        self.relax_shortbreak_duration = 1200
+        self.relax_longbreak_duration = 1800
+
+        self.relax_type = "relax_timer"
+        self.relax_cycle_count = 0
+
 
         def user_data():
             pass
@@ -71,6 +96,7 @@ class MainInterface:
             self.default_start_btn.grid(row =9 , column =2, columnspan =2, sticky="nsew" )
             self.default_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.default_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
+            self.session_type_lbl.grid(row=2, column=2, columnspan=6)
 
 
 #Change to Study Mode
@@ -83,6 +109,7 @@ class MainInterface:
             self.study_start_btn.grid(row =9 , column =2, columnspan =2, sticky="nsew" )
             self.study_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.study_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
+            self.study_session_type_lbl.grid(row=2, column=2, columnspan=6)
 
 
 #Change to Relax Mode
@@ -95,6 +122,7 @@ class MainInterface:
             self.relax_start_btn.grid(row =9 , column =2, columnspan =2, sticky="nsew" )
             self.relax_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.relax_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" ) 
+            self.relax_session_type_lbl.grid(row=2, column=2, columnspan=6)
 
 #Hide other mode buttons when switching mode
         def hide_frames():
@@ -104,18 +132,21 @@ class MainInterface:
             self.default_stop_btn.grid_forget()
             self.default_reset_btn.grid_forget()
             self.cycles_lbl.grid_forget()
+            self.session_type_lbl.grid_forget()
 
             self.study_timer_lbl.grid_forget()
 
             self.study_start_btn.grid_forget()
             self.study_stop_btn.grid_forget()
             self.study_reset_btn.grid_forget()
+            self.study_session_type_lbl.grid_forget()
 
             self.relax_timer_lbl.grid_forget()
 
             self.relax_start_btn.grid_forget()
             self.relax_stop_btn.grid_forget()
             self.relax_reset_btn.grid_forget()
+            self.relax_session_type_lbl.grid_forget()
 
         def open_color():
             # Open color picker dialog
@@ -126,7 +157,8 @@ class MainInterface:
             root.configure(bg=new_bg_color)
             self.timer_lbl.configure(bg=new_bg_color)
             self.cycles_lbl.configure(bg=new_bg_color)
- 
+            self.session_type_lbl.configure(bg=new_bg_color)
+
 
 #Save Button Functionality
         def save_settings():
@@ -156,7 +188,10 @@ class MainInterface:
             self.default_shortbreak_duration = shortbreak_duration
             self.default_longbreak_duration = longbreak_duration
 
+            self.initialize_cycles(repeat_cycles)
+
             self.number_cycles = repeat_cycles
+            self.update_cycle_count_label()
             
             self.update_default_display()
             self.cycles_lbl.config(text="Cycles: {}".format(repeat_cycles))
@@ -168,7 +203,11 @@ class MainInterface:
             self.default_longbreak_duration = 900
             self.update_default_display()
 
+            self.default_remaining_time = self.default_timer_duration
+            self.timer_type = "default_timer"
+
             self.number_cycles= 0
+            self.current_cycle = 0
             self.update_cycle_count_label()
             self.cycles_lbl.config(text="Cycles: 0")
 
@@ -189,6 +228,7 @@ class MainInterface:
             root.configure(bg="IndianRed")
             self.timer_lbl.configure(bg="IndianRed")
             self.cycles_lbl.configure(bg="IndianRed")
+            self.session_type_lbl.configure(bg="IndianRed")
 
             self.alarm_sound_combobox.set("Default Alarm")
             self.SB_sound_combobox.set("Default Short Break")
@@ -323,7 +363,8 @@ class MainInterface:
     #Default Mode Buttons and Label
         self.timer_lbl = Label(root, text = "25:00", font= ("Times", 100,), fg ="black", bg = "IndianRed")
         self.cycles_lbl = Label(root, text="Cycles:", font=("Times", 16), fg="black", bg="IndianRed")
-
+        self.defaultcurrent_SB_lbl = Label(root, text="Lets take a Short Break!", font=("Times", 16), fg="black", bg="IndianRed")
+        self.defaultcurrent_LB_lbl = Label(root, text="Lets take a Long Break!", font=("Times", 16), fg="black", bg="IndianRed")
 
         self.default_start_btn = Button(text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.start_default_time)
         self.default_stop_btn = Button(text = "Stop", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.pause_default_time)
@@ -331,6 +372,8 @@ class MainInterface:
 
     #Study Mode Buttons and Label
         self.study_timer_lbl = Label(root, text = "45:00", font= ("Times", 100,), fg ="black", bg = "cornflowerblue")
+        self.studycurrent_SB_lbl = Label(root, text="Lets take a Short Break!", font=("Times", 16), fg="black", bg="cornflowerblue")
+        self.studycurrent_LB_lbl = Label(root, text="Lets take a Long Break!", font=("Times", 16), fg="black", bg="cornflowerblue")
 
         self.study_start_btn = Button(text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.start_study_time)
         self.study_stop_btn = Button(text = "Stop", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.pause_study_time)
@@ -338,12 +381,19 @@ class MainInterface:
     
     #Relax Mode Label and Buttons
         self.relax_timer_lbl = Label(root, text = "15:00", font= ("Times", 100,), fg ="black", bg = "mediumseagreen")
- 
+        self.relaxcurrent_SB_lbl = Label(root, text="Lets take a Short Break!", font=("Times", 16), fg="black", bg="mediumseagreen")
+        self.relaxcurrent_LB_lbl = Label(root, text="Lets take a Long Break!", font=("Times", 16), fg="black", bg="mediumseagreen")
+
         self.relax_start_btn = Button(text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.start_relax_time)
         self.relax_stop_btn = Button(text = "Stop", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.pause_relax_time)
         self.relax_reset_btn = Button(text = "Reset", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.reset_relax_time)
 
+        self.session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="IndianRed")
+        self.study_session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="cornflowerblue") 
+        self.relax_session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="mediumseagreen") 
+
         switch_default_mode()
+        # Load settings from database
 
 ###########################################################################################################
 #DEFAULT#
@@ -414,41 +464,42 @@ class MainInterface:
 
     def start_cycle(self):
         if self.number_cycles > 0:
-            if self.current_cycle == 0:  # Timer phase
-                self.default_run_timer = True
-                self.default_start_timer = time.time()
-                self.update_default_time()
-            elif self.current_cycle == 1:  # Short break phase
-                self.default_run_timer = False
-                self.defaultmode_shortbreak()
-            elif self.current_cycle == 2:  # Long break phase
-                self.default_run_timer = False
-                self.defaultmode_longbreak()
-                self.current_cycle = 0  # Reset cycle for the next round
+            cycle_sequence_length = 9  # Length of the cycle sequence
+            current_cycle_in_sequence = self.current_cycle % cycle_sequence_length
+            
+            # Determine the phase of the current cycle based on the sequence
+            if current_cycle_in_sequence % 9 != 8:  # Timer or Short Break phase
+                if current_cycle_in_sequence % 2 == 0:  # Timer phase
+                    self.timer_type = "default_timer"
+                    self.default_remaining_time = self.default_timer_duration
+                    self.start_default_time()  # Start the timer
+                else:  # Short break phase
+                    self.timer_type = "short_break"
+                    self.default_remaining_time = self.default_shortbreak_duration
+                    self.start_default_time()  # Start the short break
+            else:  # Long break phase
+                self.timer_type = "long_break"
+                self.default_remaining_time = self.default_longbreak_duration
+                self.start_default_time()  # Start the long break
+                # Reset current cycle to 0 after Long Break
+                self.current_cycle = 0
+                # Update cycle count label
                 self.number_cycles -= 1
                 self.update_cycle_count_label()
-                
-                if self.number_cycles > 0:
-                    self.start_cycle()
-                    self.number_cycles -= 1
-                    self.update_cycle_count_label()
+                return  # Skip the rest of the method after the long break
 
         else:
             # Handle case when no cycles left
             self.number_cycles = 0
-            self.current_cycle = 0
-            self.update_cycle_count_label()
+            self.update_cycle_count_label()  # Update cycle count label
 
-    #Updating the number of cycles label as it completes each round
-    def update_cycle_count_label(self):
-        self.cycles_lbl.config(text="Cycles: {}".format(self.number_cycles))
+        self.current_cycle += 1
 
-    #Updating the timer, and the number of cycles each time it completes
     def update_default_time(self):
         if self.default_run_timer:
-            current_time = time.time() #get current time and find the time passed since it started
-            time_passed = current_time - self.default_start_timer  #
-            self.default_remaining_time = max(self.default_remaining_time - time_passed, 0)#prevents remaining time from become less than 0
+            current_time = time.time()  # Get current time and find the time passed since it started
+            time_passed = current_time - self.default_start_timer
+            self.default_remaining_time = max(self.default_remaining_time - time_passed, 0)  # Prevents remaining time from becoming less than 0
             self.update_default_display()
 
             if self.default_remaining_time > 0:
@@ -460,36 +511,49 @@ class MainInterface:
                 self.alarm_sound(self.timer_type)
 
                 if self.timer_type == "default_timer":
-                    # Switch to short break
-                    self.timer_type = "short_break"
-                    self.default_remaining_time = self.default_shortbreak_duration
-                    self.complete_pomodoro_session("Default", self.default_shortbreak_duration, None, "Short Break")
-                elif self.timer_type == "short_break":
-                    # Switch to long break
-                    self.timer_type = "long_break"
-                    self.default_remaining_time = self.default_longbreak_duration
-                    self.complete_pomodoro_session("Default", self.default_longbreak_duration, None, "Long Break")
-                else:
-                    # Switch back to study timer
-                    self.timer_type = "default_timer"
-                    self.default_remaining_time = self.default_timer_duration
                     self.complete_pomodoro_session("Default", self.default_timer_duration, None, "Timer")
-                    # Don't start the timer automatically, wait for user input
+                elif self.timer_type == "short_break":
+                    self.complete_pomodoro_session("Default", self.default_shortbreak_duration, None, "Short Break")
+                elif self.timer_type == "long_break":
+                    self.complete_pomodoro_session("Default", self.default_longbreak_duration, None, "Long Break")
 
+                # Automatically start the next cycle
+                self.start_cycle()
                 # Update the display with the new timer type and remaining time
                 self.update_default_display()
-                # Automatically start the next timer (short break or long break), unless it's a study timer
-                if self.timer_type != "default_timer":
-                    self.start_default_time()
-                else:
-                    # Start a new cycle
-                    self.start_cycle()
+                # Update cycle count label
+                self.update_cycle_count_label()
+
+    # Call this method to start the pomodoro cycles
+    def initialize_cycles(self, number_of_cycles):
+        self.number_cycles = number_of_cycles  # Initialize number of cycles
+        self.current_cycle = 0
+        self.start_cycle()
 
     def update_default_display(self):
         minutes = int(self.default_remaining_time // 60)
         seconds = int(self.default_remaining_time % 60)
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.timer_lbl.config(text=time_str)
+        self.update_session_type_label()
+
+    def update_cycle_count_label(self):
+        # Ensure cycle count doesn't go below zero
+        self.number_cycles = max(self.number_cycles, 0)
+        self.cycles_lbl.config(text="Cycles: {}".format(self.number_cycles))
+
+    def update_session_type_label(self):
+        # Update session type label based on the current session type
+        if self.timer_type == "default_timer":
+            session_type = "Timer"
+        elif self.timer_type == "short_break":
+            session_type = "Short Break"
+        elif self.timer_type == "long_break":
+            session_type = "Long Break"
+        else:
+            session_type = ""
+        
+        self.session_type_lbl.config(text=session_type)
 
     def alarm_sound(self, timer_type):
         if timer_type == "default_timer":
@@ -515,6 +579,7 @@ class MainInterface:
         self.study_longbreak_duration = 1500
 
         self.study_type = "study_timer"
+        self.study_cycle_count = 0
 
 
 ##STUDY MODE
@@ -553,7 +618,8 @@ class MainInterface:
         elif self.study_type == "study_shortbreak":
             self.study_remaining_time = self.study_shortbreak_duration
         else:
-            self.default_remaining_time = self.study_longbreak_duration
+            self.study_remaining_time = self.study_longbreak_duration
+        self.study_remaining_time = self.study_timer_duration
         self.update_study_display()
 
     def update_study_time(self):
@@ -568,44 +634,59 @@ class MainInterface:
                 self.root.after(1000, self.update_study_time)
             else:
                 self.study_run_timer = False
-                self.alarm_sound2()
+                self.alarm_sound2(self.study_type)
 
                 if self.study_type == "study_timer":
-                    # Switch to short break
                     self.study_type = "study_shortbreak"
                     self.study_remaining_time = self.study_shortbreak_duration
                     self.complete_pomodoro_session("Study", self.study_shortbreak_duration, None, "Short Break")
+                    self.start_study_time()  # Start short break timer automatically
                 elif self.study_type == "study_shortbreak":
-                    # Switch to long break
-                    self.study_type = "study_longbreak"
-                    self.default_remaining_time = self.study_longbreak_duration
-                    self.complete_pomodoro_session("Study", self.study_longbreak_duration, None, "Long Break")
-                else:
-                    # Switch back to study timer
-                    self.study_type = "study_timer"
-                    self.study_remaining_time = self.study_timer_duration
-                    self.complete_pomodoro_session("Study", self.study_timer_duration, None, "Timer")
-                    # Don't start the timer automatically, wait for user input
-                    return
+                    self.study_cycle_count += 1
+                    if self.study_cycle_count < 4:
+                        self.study_type = "study_timer"
+                        self.study_remaining_time = self.study_timer_duration
+                        self.complete_pomodoro_session("Study", self.study_timer_duration, None, "Timer")
+                        self.start_study_time()  # Start timer automatically
+                    else:
+                        self.study_type = "study_longbreak"
+                        self.study_remaining_time = self.study_longbreak_duration
+                        self.complete_pomodoro_session("Study", self.study_longbreak_duration, None, "Long Break")
+                        self.study_cycle_count = 0  # Reset cycle count after long break
+                        self.start_study_time()  # Start long break timer automatically
 
                 # Update the display with the new timer type and remaining time
                 self.update_study_display()
-                # Automatically start the next timer (short break or long break), unless it's a study timer
-                if self.study_type != "study_timer":
-                    self.start_study_time()
+
 
     def update_study_display(self):
         minutes = int(self.study_remaining_time // 60)
         seconds = int(self.study_remaining_time % 60)
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.study_timer_lbl.config(text=time_str)
+        self.update_study_session_type_label()
 
-    def alarm_sound2(self, sound_type="study_timer"):
-        if sound_type == "study_timer":
+    def update_study_session_type_label(self):
+        # Update session type label based on the current session type
+        if self.study_type == "study_timer":
+            study_session_type = "Timer"
+        elif self.study_type == "study_shortbreak":
+            study_session_type = "Short Break"
+        elif self.study_type == "study_longbreak":
+            study_session_type = "Long Break"
+        else:
+            study_session_type = ""
+        
+        self.study_session_type_lbl.config(text=study_session_type)
+
+    def alarm_sound2(self,study_type):
+        winsound.PlaySound(None, winsound.SND_FILENAME)
+
+        if study_type == "study_timer":
             winsound.PlaySound("Study Referee Alarm.wav", winsound.SND_FILENAME)
-        elif sound_type == "study_shortbreak":
+        elif study_type == "study_shortbreak":
             winsound.PlaySound("Study Churchbell SB.wav", winsound.SND_FILENAME)
-        elif sound_type == "study_longbreak":
+        elif study_type == "study_longbreak":
             winsound.PlaySound("Study Great Harp LB.wav", winsound.SND_FILENAME)
 
 #########################################################################################################33
@@ -620,6 +701,7 @@ class MainInterface:
         self.relax_longbreak_duration = 1800
 
         self.relax_type = "relax_timer"
+        self.relax_cycle_count = 0
 
 ##RELAX
     def relaxmode_timer(self): #15 mins
@@ -673,48 +755,60 @@ class MainInterface:
                 self.root.after(1000, self.update_relax_time)
             else:
                 self.relax_run_timer = False
-                self.alarm_sound3()
+                self.alarm_sound3(self.relax_type)
 
                 if self.relax_type == "relax_timer":
-                    # Switch to short break
                     self.relax_type = "relax_shortbreak"
                     self.relax_remaining_time = self.relax_shortbreak_duration
                     self.complete_pomodoro_session("Relax", self.relax_shortbreak_duration, None, "Short Break")
-
+                    self.start_relax_time()  # Start short break timer automatically
                 elif self.relax_type == "relax_shortbreak":
-                    # Switch to long break
-                    self.relax_type = "relax_longbreak"
-                    self.relax_remaining_time = self.relax_longbreak_duration
-                    self.complete_pomodoro_session("Relax", self.relax_longbreak_duration, None, "Long Break")
-                else:
-                    # Switch back to study timer
-                    self.relax_type = "relax_timer"
-                    self.relax_remaining_time = self.relax_timer_duration
-                    self.complete_pomodoro_session("Relax", self.default_timer_duration, None, "Timer")
-                    # Don't start the timer automatically, wait for user input
-                    return
+                    self.relax_cycle_count += 1
+                    if self.relax_cycle_count < 4:
+                        self.relax_type = "relax_timer"
+                        self.relax_remaining_time = self.relax_timer_duration
+                        self.complete_pomodoro_session("Relax", self.study_timer_duration, None, "Timer")
+                        self.start_relax_time()  # Start timer automatically
+                    else:
+                        self.relax_type = "relax_longbreak"
+                        self.relax_remaining_time = self.relax_longbreak_duration
+                        self.complete_pomodoro_session("Relax", self.study_longbreak_duration, None, "Long Break")
+                        self.relax_cycle_count = 0  # Reset cycle count after long break
+                        self.start_relax_time()  # Start long break timer automatically
 
                 # Update the display with the new timer type and remaining time
                 self.update_relax_display()
-                # Automatically start the next timer (short break or long break), unless it's a study timer
-                if self.relax_type != "relax_timer":
-                    self.start_relax_time()
+
 
     def update_relax_display(self):
         minutes = int(self.relax_remaining_time // 60)
         seconds = int(self.relax_remaining_time % 60)
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.relax_timer_lbl.config(text=time_str)
+        self.update_relax_session_type_label()
 
+    def update_relax_session_type_label(self):
+        # Update session type label based on the current session type
+        if self.relax_type == "relax_timer":
+            relax_session_type = "Timer"
+        elif self.relax_type == "relax_shortbreak":
+            relax_session_type = "Short Break"
+        elif self.relax_type == "relax_longbreak":
+            relax_session_type = "Long Break"
+        else:
+            relax_session_type = ""
+        
+        self.relax_session_type_lbl.config(text=relax_session_type)
 
-    def alarm_sound3(self, sound_type="relax_timer"):
-        if sound_type == "relax_timer":
+    def alarm_sound3(self,relax_type):
+        winsound.PlaySound(None, winsound.SND_FILENAME)
+
+        if relax_type == "relax_timer":
             winsound.PlaySound("Relax Chime Alarm.wav", winsound.SND_FILENAME)
-        elif sound_type == "relax_shortbreak":
-            winsound.PlaySound("Relax Windchimes SB.wav", winsound.SND_FILENAME)
-        elif sound_type == "relax_longbreak":
+        elif relax_type == "relax_shortbreak":
+            winsound.PlaySound("Relax WindChimes SB.wav", winsound.SND_FILENAME)
+        elif relax_type == "relax_longbreak":
             winsound.PlaySound("Relax Harp LB.wav", winsound.SND_FILENAME)
-    
 
     def insert_pomodoro_session(self, mode, session_type, duration, user='John'):
         completion_time = datetime.now().isoformat()  # Get the current completion time
@@ -724,7 +818,6 @@ class MainInterface:
         INSERT INTO PomodoroSessions (User, Mode, SessionType, Duration, CompletionTime)
         VALUES (?, ?, ?, ?, ?)
         ''', (user, mode, session_type, duration, completion_time))
-
 
 if __name__ == "__main__":
     root = Tk()
