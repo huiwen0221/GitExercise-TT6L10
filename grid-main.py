@@ -33,6 +33,19 @@ class MainInterface:
             CompletionTime TEXT NOT NULL
         );""")
 
+        # Create Table for User Settings if not exists
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS UserSettings (
+            SettingID INTEGER PRIMARY KEY AUTOINCREMENT,
+            TimerDuration INTEGER NOT NULL,
+            ShortBreakDuration INTEGER NOT NULL,
+            LongBreakDuration INTEGER NOT NULL,
+            RepeatCycles INTEGER NOT NULL,
+            TimerEndSound TEXT NOT NULL,
+            ShortBreakSound TEXT NOT NULL,
+            LongBreakSound TEXT NOT NULL,
+            BackgroundColor TEXT NOT NULL
+        );""")
+
         self.sound_files = {
             "Default Alarm": "Default Timer Alarm.wav",
             "Referee Whistle": "Study Referee Alarm.wav",
@@ -48,6 +61,9 @@ class MainInterface:
         self.timer_end_sound = self.sound_files["Default Alarm"]
         self.short_break_sound = self.sound_files["Default Short Break"]
         self.long_break_sound = self.sound_files["Default Microwave"]
+
+        self.background_color="Indianred"
+
 
         self.study_run_timer = False
         self.study_start_timer = 0
@@ -158,6 +174,40 @@ class MainInterface:
             self.timer_lbl.configure(bg=new_bg_color)
             self.cycles_lbl.configure(bg=new_bg_color)
             self.session_type_lbl.configure(bg=new_bg_color)
+            self.background_color = new_bg_color
+
+        def load_user_settings():
+            self.cursor.execute("SELECT SettingID, TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor FROM UserSettings ORDER BY SettingID DESC LIMIT 1")
+            row = self.cursor.fetchone()
+            if row:
+                (setting_id, timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
+                timer_end_sound, short_break_sound, long_break_sound, background_color) = row
+
+                self.default_timer_duration = timer_duration
+                self.default_remaining_time = timer_duration
+
+                self.default_shortbreak_duration = shortbreak_duration
+                self.default_longbreak_duration = longbreak_duration
+
+                self.initialize_cycles(repeat_cycles)
+
+                self.timer_end_sound = timer_end_sound
+                self.short_break_sound = short_break_sound
+                self.long_break_sound = long_break_sound
+
+                self.background_color = background_color
+
+                # Apply settings to UI
+                self.root.configure(bg=background_color)
+                self.timer_lbl.configure(bg=background_color)
+                self.cycles_lbl.configure(bg=background_color)
+                self.session_type_lbl.configure(bg=background_color)
+                self.update_cycle_count_label()
+                self.update_default_display()
+
+                print("User settings loaded successfully!")
+            else:
+                print("No user settings found. Using default settings.")
 
 
 #Save Button Functionality
@@ -195,6 +245,18 @@ class MainInterface:
             
             self.update_default_display()
             self.cycles_lbl.config(text="Cycles: {}".format(repeat_cycles))
+            # Save settings to database
+            self.cursor.execute("DELETE FROM UserSettings")
+            self.cursor.execute("""INSERT INTO UserSettings (
+                TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, 
+                TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
+                 self.timer_end_sound, self.short_break_sound, self.long_break_sound,
+                 self.background_color))
+            self.conn.commit()
+
+            print("Settings saved successfully!")
 
 #Reset All Entry Boxes and Revert to Original Default Mode
         def reset_default_mode():
@@ -237,7 +299,8 @@ class MainInterface:
             self.timer_end_sound = self.sound_files["Default Alarm"]
             self.short_break_sound = self.sound_files["Default Short Break"]
             self.long_break_sound = self.sound_files["Default Microwave"]
-
+            save_settings()
+            
 #Settings Window
         def open_settings():
             settings_window = Toplevel(root)
@@ -292,6 +355,9 @@ class MainInterface:
             self.repeat_cycles_entry = Entry(settings_window, font=("Arial",13))
             self.repeat_cycles_entry.grid(row = 3, column=4, columnspan=2, padx=10, pady=5)
 
+        #Load Settings
+            self.load_settings_btn=Button(settings_window, text="Load", font=("Arial",25), bg="white", fg="black", command=load_user_settings)
+            self.load_settings_btn.grid(row=9, column=0, columnspan=2, sticky="nsew")
 
         #SAVE Settings
             self.save_btn=Button(settings_window, text="Save", font=("Arial",25), bg="white", fg="black", command=save_settings)
