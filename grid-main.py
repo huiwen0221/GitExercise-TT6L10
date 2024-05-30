@@ -1,10 +1,11 @@
 from tkinter import *
 import time
-import winsound
 import sqlite3
 from datetime import datetime
 from tkinter import ttk
 from tkinter import colorchooser
+import pygame
+
 
 
 class MainInterface:
@@ -14,6 +15,8 @@ class MainInterface:
         self.root.geometry("700x500")
         self.root.configure(bg = "IndianRed")
 
+        pygame.init()
+        pygame.mixer.init()
 
         #Defining Grid 
         self.root.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
@@ -43,7 +46,8 @@ class MainInterface:
             TimerEndSound TEXT NOT NULL,
             ShortBreakSound TEXT NOT NULL,
             LongBreakSound TEXT NOT NULL,
-            BackgroundColor TEXT NOT NULL
+            BackgroundColor TEXT NOT NULL,
+            Volume INTEGER NOT NULL
         );""")
 
         self.sound_files = {
@@ -73,6 +77,7 @@ class MainInterface:
         self.study_shortbreak_duration = 900
         self.study_longbreak_duration = 1500
 
+        self.volume = 50
         self.study_type = "study_timer"
         self.study_cycle_count = 0
 
@@ -176,12 +181,43 @@ class MainInterface:
             self.session_type_lbl.configure(bg=new_bg_color)
             self.background_color = new_bg_color
 
+        def update_volume(val):
+            volume = int(val) / 100  # Scale to 0-1 for pygame
+            pygame.mixer.music.set_volume(volume)
+            self.volume_label.config(text=f"Volume: {val}%")
+
         def load_user_settings():
-            self.cursor.execute("SELECT SettingID, TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor FROM UserSettings ORDER BY SettingID DESC LIMIT 1")
+            self.cursor.execute("SELECT SettingID, TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor, Volume FROM UserSettings ORDER BY SettingID DESC LIMIT 1")
             row = self.cursor.fetchone()
             if row:
                 (setting_id, timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
-                timer_end_sound, short_break_sound, long_break_sound, background_color) = row
+                timer_end_sound, short_break_sound, long_break_sound, background_color, volume) = row
+
+                                # Update timer durations
+                self.timer_entry.delete(0, END)
+                self.timer_entry.insert(0, str(timer_duration // 60))  # minutes
+                self.timerseconds_entry.delete(0, END)
+                self.timerseconds_entry.insert(0, str(timer_duration % 60))  # seconds
+
+                self.shortbreak_entry.delete(0, END)
+                self.shortbreak_entry.insert(0, str(shortbreak_duration // 60))
+                self.shortbreakseconds_entry.delete(0, END)
+                self.shortbreakseconds_entry.insert(0, str(shortbreak_duration % 60))
+
+                self.longbreak_entry.delete(0, END)
+                self.longbreak_entry.insert(0, str(longbreak_duration // 60))
+                self.longbreakseconds_entry.delete(0, END)
+                self.longbreakseconds_entry.insert(0, str(longbreak_duration % 60))
+
+                # Update repeat cycles
+                self.repeat_cycles_entry.delete(0, END)
+                self.repeat_cycles_entry.insert(0, str(repeat_cycles))
+
+                # Set selected values in comboboxes
+                self.alarm_sound_combobox.set(timer_end_sound)
+                self.SB_sound_combobox.set(short_break_sound)
+                self.LB_sound_combobox.set(long_break_sound)
+                
 
                 self.default_timer_duration = timer_duration
                 self.default_remaining_time = timer_duration
@@ -196,6 +232,7 @@ class MainInterface:
                 self.long_break_sound = long_break_sound
 
                 self.background_color = background_color
+                self.volume = volume 
 
                 # Apply settings to UI
                 self.root.configure(bg=background_color)
@@ -204,7 +241,8 @@ class MainInterface:
                 self.session_type_lbl.configure(bg=background_color)
                 self.update_cycle_count_label()
                 self.update_default_display()
-
+                # Apply volume to volume slider
+                self.volume_slider.set(volume)
                 print("User settings loaded successfully!")
             else:
                 print("No user settings found. Using default settings.")
@@ -245,15 +283,16 @@ class MainInterface:
             
             self.update_default_display()
             self.cycles_lbl.config(text="Cycles: {}".format(repeat_cycles))
+            volume = self.volume_slider.get()
             # Save settings to database
             self.cursor.execute("DELETE FROM UserSettings")
             self.cursor.execute("""INSERT INTO UserSettings (
                 TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, 
-                TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor, Volume
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
                  self.timer_end_sound, self.short_break_sound, self.long_break_sound,
-                 self.background_color))
+                 self.background_color, volume))
             self.conn.commit()
 
             print("Settings saved successfully!")
@@ -299,7 +338,11 @@ class MainInterface:
             self.timer_end_sound = self.sound_files["Default Alarm"]
             self.short_break_sound = self.sound_files["Default Short Break"]
             self.long_break_sound = self.sound_files["Default Microwave"]
+            self.volume = 50
+            # Reset volume slider to 50
+            self.volume_slider.set(50)
             save_settings()
+
             
 #Settings Window
         def open_settings():
@@ -372,9 +415,9 @@ class MainInterface:
             self.sounds_entry_lbl= Label(settings_window, text="Sounds Options:", font=("Arial",18), bg="gray", fg="black")
             self.sounds_entry_lbl.grid(row = 4, column=1,columnspan=3)
 
-            alarm_options = ["Default Alarm","Referee Whistle","Chime"]
-            SB_options = ["Default Short Break", "Churchbell", "Wind Chimes"]
-            LB_options = ["Default Microwave", "Great Harp", "Relaxing Harp"]
+            alarm_options = ["Default Alarm","Referee Whistle","Chime","Default Short Break","Churchbell","Wind Chimes","Default Microwave", "Great Harp", "Relaxing Harp"]
+            SB_options = ["Default Short Break", "Churchbell", "Wind Chimes","Default Alarm","Referee Whistle","Chime","Default Microwave", "Great Harp", "Relaxing Harp"]
+            LB_options = ["Default Microwave", "Great Harp", "Relaxing Harp","Default Alarm","Referee Whistle","Chime","Default Short Break","Churchbell","Wind Chimes"]
 
             self.alarm_sound_combobox = ttk.Combobox(settings_window, values=alarm_options, font=("Arial",13))
             self.alarm_sound_combobox.current(0)
@@ -399,6 +442,16 @@ class MainInterface:
             self.bg_color_btn = Button(settings_window, text="Background Color", font=("Arial",13), bg="white", fg="black", command=open_color)
             self.bg_color_btn.grid(row=5, column=4, columnspan =2)
 
+            # Volume Slider
+            volume_label = Label(settings_window, text="Sound Volume:", font=("Arial", 18), bg="gray", fg="black")
+            volume_label.grid(row=6, column=1, columnspan=3)
+
+            self.volume_slider = Scale(settings_window, from_=0, to=100, orient=HORIZONTAL, command=update_volume, font=("Arial", 13))
+            self.volume_slider.set(self.volume)
+            self.volume_slider.grid(row=6, column=4, columnspan=3)
+
+            self.volume_label = Label(settings_window, text=f"Volume: {self.volume}%", font=("Arial", 13), bg="gray", fg="black")
+            self.volume_label.grid(row=6, column=7, columnspan=2)
 
 #MENU Taskbar
         menu_bar = Menu(root)
@@ -463,7 +516,6 @@ class MainInterface:
 
 ###########################################################################################################
 #DEFAULT#
-
 # Default mode timer variables
         self.default_run_timer = False
         self.default_start_timer = 0
@@ -583,9 +635,9 @@ class MainInterface:
                 elif self.timer_type == "long_break":
                     self.complete_pomodoro_session("Default", self.default_longbreak_duration, None, "Long Break")
 
-                # Automatically start the next cycle
-                self.start_cycle()
-                # Update the display with the new timer type and remaining time
+                # Wait for the sound to finish before starting the next session
+                sound_length = pygame.mixer.Sound(self.timer_end_sound).get_length() * 1000  # Convert seconds to milliseconds
+                self.root.after(int(sound_length), self.start_cycle) 
                 self.update_default_display()
                 # Update cycle count label
                 self.update_cycle_count_label()
@@ -630,7 +682,8 @@ class MainInterface:
             self.play_sound(self.long_break_sound)
 
     def play_sound(self, sound_file):
-        winsound.PlaySound(sound_file, winsound.SND_FILENAME)
+        pygame.mixer.music.load(sound_file)
+        pygame.mixer.music.play()
 
 #################################################################################################################
 #STUDY#
@@ -646,6 +699,11 @@ class MainInterface:
 
         self.study_type = "study_timer"
         self.study_cycle_count = 0
+
+        #Load sounds
+        self.study_timer_sound = pygame.mixer.Sound("Study Referee Alarm.wav")
+        self.study_shortbreak_sound = pygame.mixer.Sound("Study Churchbell SB.wav")
+        self.study_longbreak_sound = pygame.mixer.Sound("Study Great Harp LB.wav")
 
 
 ##STUDY MODE
@@ -720,7 +778,7 @@ class MainInterface:
                         self.complete_pomodoro_session("Study", self.study_longbreak_duration, None, "Long Break")
                         self.study_cycle_count = 0  # Reset cycle count after long break
                         self.start_study_time()  # Start long break timer automatically
-
+                        # Calculate the length of the sound file in milliseconds
                 # Update the display with the new timer type and remaining time
                 self.update_study_display()
 
@@ -746,14 +804,15 @@ class MainInterface:
         self.study_session_type_lbl.config(text=study_session_type)
 
     def alarm_sound2(self,study_type):
-        winsound.PlaySound(None, winsound.SND_FILENAME)
+        # Stop any currently playing sound
+        pygame.mixer.stop()
 
         if study_type == "study_timer":
-            winsound.PlaySound("Study Referee Alarm.wav", winsound.SND_FILENAME)
+            self.study_timer_sound.play()
         elif study_type == "study_shortbreak":
-            winsound.PlaySound("Study Churchbell SB.wav", winsound.SND_FILENAME)
+            self.study_shortbreak_sound.play()
         elif study_type == "study_longbreak":
-            winsound.PlaySound("Study Great Harp LB.wav", winsound.SND_FILENAME)
+            self.study_longbreak_sound.play()
 
 #########################################################################################################33
 #RELAX#
@@ -768,6 +827,11 @@ class MainInterface:
 
         self.relax_type = "relax_timer"
         self.relax_cycle_count = 0
+
+        #Load sounds
+        self.relax_timer_sound = pygame.mixer.Sound("Relax Chime Alarm.wav")
+        self.relax_shortbreak_sound = pygame.mixer.Sound("Relax WindChimes SB.wav")
+        self.relax_longbreak_sound = pygame.mixer.Sound("Relax Harp LB.wav")
 
 ##RELAX
     def relaxmode_timer(self): #15 mins
@@ -867,14 +931,15 @@ class MainInterface:
         self.relax_session_type_lbl.config(text=relax_session_type)
 
     def alarm_sound3(self,relax_type):
-        winsound.PlaySound(None, winsound.SND_FILENAME)
+        # Stop any currently playing sound
+        pygame.mixer.stop()
 
         if relax_type == "relax_timer":
-            winsound.PlaySound("Relax Chime Alarm.wav", winsound.SND_FILENAME)
+            self.relax_timer_sound.play()
         elif relax_type == "relax_shortbreak":
-            winsound.PlaySound("Relax WindChimes SB.wav", winsound.SND_FILENAME)
+            self.relax_shortbreak_sound.play()
         elif relax_type == "relax_longbreak":
-            winsound.PlaySound("Relax Harp LB.wav", winsound.SND_FILENAME)
+            self.relax_longbreak_sound.play()
 
     def insert_pomodoro_session(self, mode, session_type, duration, user='John'):
         completion_time = datetime.now().isoformat()  # Get the current completion time
@@ -889,3 +954,4 @@ if __name__ == "__main__":
     root = Tk()
     app = MainInterface(root)
     root.mainloop()
+    pygame.quit()
