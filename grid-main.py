@@ -50,6 +50,19 @@ class MainInterface:
             Volume INTEGER NOT NULL
         );""")
 
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Presets (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            TimerDuration INTEGER,
+            ShortBreakDuration INTEGER,
+            LongBreakDuration INTEGER,
+            RepeatCycles INTEGER,
+            TimerEndSound TEXT,
+            ShortBreakSound TEXT,
+            LongBreakSound TEXT,
+            BackgroundColor TEXT,
+            Volume INTEGER
+        );""")
+
         self.sound_files = {
             "Default Alarm": "Default Timer Alarm.wav",
             "Referee Whistle": "Study Referee Alarm.wav",
@@ -65,9 +78,7 @@ class MainInterface:
         self.timer_end_sound = self.sound_files["Default Alarm"]
         self.short_break_sound = self.sound_files["Default Short Break"]
         self.long_break_sound = self.sound_files["Default Microwave"]
-
         self.background_color="Indianred"
-
 
         self.study_run_timer = False
         self.study_start_timer = 0
@@ -94,7 +105,6 @@ class MainInterface:
         self.relax_type = "relax_timer"
         self.relax_cycle_count = 0
 
-
         def user_data():
             pass
         
@@ -119,7 +129,6 @@ class MainInterface:
             self.default_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
             self.session_type_lbl.grid(row=2, column=2, columnspan=6)
 
-
 #Change to Study Mode
         def study_mode():
             root.config(bg="Cornflowerblue")
@@ -131,7 +140,6 @@ class MainInterface:
             self.study_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.study_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
             self.study_session_type_lbl.grid(row=2, column=2, columnspan=6)
-
 
 #Change to Relax Mode
         def relax_mode():
@@ -172,6 +180,7 @@ class MainInterface:
         def open_color():
             # Open color picker dialog
             color = colorchooser.askcolor(title="Choose Color")
+            new_bg_color = None  # Default value
             if color[1]:  # If a color is selected
                 new_bg_color = color[1]  # Get the hexadecimal color code
             # Update background color of specified elements
@@ -186,81 +195,37 @@ class MainInterface:
             pygame.mixer.music.set_volume(volume)
             self.volume_label.config(text=f"Volume: {val}%")
 
-        def load_user_settings():
-            self.cursor.execute("SELECT SettingID, TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor, Volume FROM UserSettings ORDER BY SettingID DESC LIMIT 1")
-            row = self.cursor.fetchone()
-            if row:
-                (setting_id, timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
-                timer_end_sound, short_break_sound, long_break_sound, background_color, volume) = row
+        def save_preset1_settings():
+            save_preset_settings(1)
 
-                                # Update timer durations
-                self.timer_entry.delete(0, END)
-                self.timer_entry.insert(0, str(timer_duration // 60))  # minutes
-                self.timerseconds_entry.delete(0, END)
-                self.timerseconds_entry.insert(0, str(timer_duration % 60))  # seconds
+        def save_preset2_settings():
+            save_preset_settings(2)
 
-                self.shortbreak_entry.delete(0, END)
-                self.shortbreak_entry.insert(0, str(shortbreak_duration // 60))
-                self.shortbreakseconds_entry.delete(0, END)
-                self.shortbreakseconds_entry.insert(0, str(shortbreak_duration % 60))
+        def save_preset3_settings():
+            save_preset_settings(3)
 
-                self.longbreak_entry.delete(0, END)
-                self.longbreak_entry.insert(0, str(longbreak_duration // 60))
-                self.longbreakseconds_entry.delete(0, END)
-                self.longbreakseconds_entry.insert(0, str(longbreak_duration % 60))
+        def load_preset1_settings():
+            load_preset_settings(1)
 
-                # Update repeat cycles
-                self.repeat_cycles_entry.delete(0, END)
-                self.repeat_cycles_entry.insert(0, str(repeat_cycles))
+        def load_preset2_settings():
+            load_preset_settings(2)
 
-                # Set selected values in comboboxes
-                self.alarm_sound_combobox.set(timer_end_sound)
-                self.SB_sound_combobox.set(short_break_sound)
-                self.LB_sound_combobox.set(long_break_sound)
-                
+        def load_preset3_settings():
+            load_preset_settings(3)
 
-                self.default_timer_duration = timer_duration
-                self.default_remaining_time = timer_duration
-
-                self.default_shortbreak_duration = shortbreak_duration
-                self.default_longbreak_duration = longbreak_duration
-
-                self.initialize_cycles(repeat_cycles)
-
-                self.timer_end_sound = timer_end_sound
-                self.short_break_sound = short_break_sound
-                self.long_break_sound = long_break_sound
-
-                self.background_color = background_color
-                self.volume = volume 
-
-                # Apply settings to UI
-                self.root.configure(bg=background_color)
-                self.timer_lbl.configure(bg=background_color)
-                self.cycles_lbl.configure(bg=background_color)
-                self.session_type_lbl.configure(bg=background_color)
-                self.update_cycle_count_label()
-                self.update_default_display()
-                # Apply volume to volume slider
-                self.volume_slider.set(volume)
-                print("User settings loaded successfully!")
-            else:
-                print("No user settings found. Using default settings.")
-
-
-#Save Button Functionality
-        def save_settings():
-            timer_minutes = int(self.timer_entry.get() or 0)  #entry for timer
+        def save_preset_settings(preset_number):
+            # Retrieve settings from UI inputs
+            timer_minutes = int(self.timer_entry.get() or 0)
             timer_seconds = int(self.timerseconds_entry.get() or 0)
-            shortbreak_minutes = int(self.shortbreak_entry.get() or 0) #entry for short break
+            shortbreak_minutes = int(self.shortbreak_entry.get() or 0)
             shortbreak_seconds = int(self.shortbreakseconds_entry.get() or 0)
-            longbreak_minutes = int(self.longbreak_entry.get() or 0) #entry for long break
+            longbreak_minutes = int(self.longbreak_entry.get() or 0)
             longbreak_seconds = int(self.longbreakseconds_entry.get() or 0)
-            repeat_cycles = int(self.repeat_cycles_entry.get() or 0) #entry for number of repeated cycles
+            repeat_cycles = int(self.repeat_cycles_entry.get() or 0)
 
-            timer_duration = timer_minutes *60 + timer_seconds
-            shortbreak_duration = shortbreak_minutes *60 + shortbreak_seconds
-            longbreak_duration = longbreak_minutes *60 + longbreak_seconds
+            timer_duration = timer_minutes * 60 + timer_seconds
+            shortbreak_duration = shortbreak_minutes * 60 + shortbreak_seconds
+            longbreak_duration = longbreak_minutes * 60 + longbreak_seconds
 
             selected_timer_end_sound = self.alarm_sound_combobox.get()
             selected_short_break_sound = self.SB_sound_combobox.get()
@@ -284,18 +249,93 @@ class MainInterface:
             self.update_default_display()
             self.cycles_lbl.config(text="Cycles: {}".format(repeat_cycles))
             volume = self.volume_slider.get()
-            # Save settings to database
-            self.cursor.execute("DELETE FROM UserSettings")
-            self.cursor.execute("""INSERT INTO UserSettings (
-                TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, 
-                TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor, Volume
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
-                 self.timer_end_sound, self.short_break_sound, self.long_break_sound,
-                 self.background_color, volume))
+
+            # Check if the preset already exists
+            self.cursor.execute("SELECT COUNT(*) FROM Presets WHERE ID = ?", (preset_number,))
+            exists = self.cursor.fetchone()[0]
+
+            if exists:
+                # Update existing preset
+                self.cursor.execute("""UPDATE Presets SET
+                    TimerDuration = ?, ShortBreakDuration = ?, LongBreakDuration = ?, RepeatCycles = ?, TimerEndSound = ?, ShortBreakSound = ?, LongBreakSound = ?, BackgroundColor = ?, Volume = ?
+                    WHERE ID = ?""",
+                    (timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
+                    self.timer_end_sound, self.short_break_sound, self.long_break_sound,
+                    self.background_color, volume, preset_number))
+                print(f"Preset '{preset_number}' settings updated successfully!")
+            else:
+                # Insert new preset
+                self.cursor.execute("""INSERT INTO Presets (
+                    ID, TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor, Volume
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (preset_number, timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
+                self.timer_end_sound, self.short_break_sound, self.long_break_sound,
+                self.background_color, volume))
+                print(f"Preset '{preset_number}' settings saved successfully!")
+            
             self.conn.commit()
 
-            print("Settings saved successfully!")
+        def load_preset_settings(preset_number):
+            self.cursor.execute(
+                "SELECT TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor, Volume FROM Presets WHERE ID = ?",
+                (preset_number,)
+            )
+            row = self.cursor.fetchone()
+            if row:
+                # Unpack the row into variables
+                (timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
+                timer_end_sound, short_break_sound, long_break_sound, background_color, volume) = row
+
+                # Update UI with loaded settings
+                self.timer_entry.delete(0, END)
+                self.timer_entry.insert(0, str(timer_duration // 60))  # minutes
+                self.timerseconds_entry.delete(0, END)
+                self.timerseconds_entry.insert(0, str(timer_duration % 60))  # seconds
+
+                self.shortbreak_entry.delete(0, END)
+                self.shortbreak_entry.insert(0, str(shortbreak_duration // 60))
+                self.shortbreakseconds_entry.delete(0, END)
+                self.shortbreakseconds_entry.insert(0, str(shortbreak_duration % 60))
+
+                self.longbreak_entry.delete(0, END)
+                self.longbreak_entry.insert(0, str(longbreak_duration // 60))
+                self.longbreakseconds_entry.delete(0, END)
+                self.longbreakseconds_entry.insert(0, str(longbreak_duration % 60))
+
+                self.repeat_cycles_entry.delete(0, END)
+                self.repeat_cycles_entry.insert(0, str(repeat_cycles))
+
+                self.alarm_sound_combobox.set(timer_end_sound)
+                self.SB_sound_combobox.set(short_break_sound)
+                self.LB_sound_combobox.set(long_break_sound)
+
+                self.default_timer_duration = timer_duration
+                self.default_remaining_time = timer_duration
+
+                self.default_shortbreak_duration = shortbreak_duration
+                self.default_longbreak_duration = longbreak_duration
+
+                self.initialize_cycles(repeat_cycles)
+
+                self.timer_end_sound = timer_end_sound
+                self.short_break_sound = short_break_sound
+                self.long_break_sound = long_break_sound
+
+                self.background_color = background_color
+                self.volume = volume
+
+                # Apply settings to UI
+                self.root.configure(bg=background_color)
+                self.timer_lbl.configure(bg=background_color)
+                self.cycles_lbl.configure(bg=background_color)
+                self.session_type_lbl.configure(bg=background_color)
+                self.update_cycle_count_label()
+                self.update_default_display()
+                # Apply volume to volume slider
+                self.volume_slider.set(volume)
+                print(f"Preset {preset_number} settings loaded successfully!")
+            else:
+                print(f"No settings found for Preset {preset_number}.")
 
 #Reset All Entry Boxes and Revert to Original Default Mode
         def reset_default_mode():
@@ -341,9 +381,33 @@ class MainInterface:
             self.volume = 50
             # Reset volume slider to 50
             self.volume_slider.set(50)
-            save_settings()
+            # Reset all three presets to original defaults
+            for preset_number in range(1, 4):
+                # Get the original default settings for each preset from the Presets table
+                self.cursor.execute(
+                    "SELECT TimerDuration, ShortBreakDuration, LongBreakDuration, RepeatCycles, TimerEndSound, ShortBreakSound, LongBreakSound, BackgroundColor, Volume FROM Presets WHERE ID = ?",
+                    (preset_number,)
+                )
+                row = self.cursor.fetchone()
+                if row:
+                    # Unpack the row into variables
+                    (timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
+                    timer_end_sound, short_break_sound, long_break_sound, background_color, volume) = row
 
-            
+                    # Update the preset with the original default values
+                    self.cursor.execute("""UPDATE Presets SET
+                        TimerDuration = ?, ShortBreakDuration = ?, LongBreakDuration = ?, RepeatCycles = ?, TimerEndSound = ?, ShortBreakSound = ?, LongBreakSound = ?, BackgroundColor = ?, Volume = ?
+                        WHERE ID = ?""",
+                        (timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
+                        timer_end_sound, short_break_sound, long_break_sound,
+                        "IndianRed", 50, preset_number))  # Hardcode default background color and volume
+
+                    # Commit changes to the database
+                    self.conn.commit()
+
+            # Commit changes to the database after resetting all presets
+            self.conn.commit()
+
 #Settings Window
         def open_settings():
             settings_window = Toplevel(root)
@@ -398,14 +462,6 @@ class MainInterface:
             self.repeat_cycles_entry = Entry(settings_window, font=("Arial",13))
             self.repeat_cycles_entry.grid(row = 3, column=4, columnspan=2, padx=10, pady=5)
 
-        #Load Settings
-            self.load_settings_btn=Button(settings_window, text="Load", font=("Arial",25), bg="white", fg="black", command=load_user_settings)
-            self.load_settings_btn.grid(row=9, column=0, columnspan=2, sticky="nsew")
-
-        #SAVE Settings
-            self.save_btn=Button(settings_window, text="Save", font=("Arial",25), bg="white", fg="black", command=save_settings)
-            self.save_btn.grid(row=9,column=4,columnspan=2,sticky="nsew")
-
         #RESET Settings Button
             self.reset_all_btn=Button(settings_window, text="RESET TO ORIGINAL", font=("Arial",15), bg="red", fg="black", activebackground="red", command=reset_default_mode)
             self.reset_all_btn.grid(row=9,column=9,columnspan=2,sticky="nsew")
@@ -450,8 +506,29 @@ class MainInterface:
             self.volume_slider.set(self.volume)
             self.volume_slider.grid(row=6, column=4, columnspan=3)
 
-            self.volume_label = Label(settings_window, text=f"Volume: {self.volume}%", font=("Arial", 13), bg="gray", fg="black")
+            self.volume_label = Label(settings_window, text=f"Volume: {self.volume}%", font=("Arial", 17), bg="gray", fg="black")
             self.volume_label.grid(row=6, column=7, columnspan=2)
+
+            self.preset1_label = Label(settings_window, text="Preset 1:", font=("Arial", 18), bg="gray", fg="black")
+            self.preset1_label.grid(row=7, column=1, columnspan=2)
+            self.save_preset1_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset1_settings)
+            self.save_preset1_btn.grid(row=7,column=3,columnspan=1,sticky="nsew")
+            self.load_preset1_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset1_settings)
+            self.load_preset1_btn.grid(row=7,column=5,columnspan=1,sticky="nsew")
+
+            self.preset2_label = Label(settings_window, text="Preset 2:", font=("Arial", 18), bg="gray", fg="black")
+            self.preset2_label.grid(row=8, column=1, columnspan=2)
+            self.save_preset2_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset2_settings)
+            self.save_preset2_btn.grid(row=8,column=3,columnspan=1,sticky="nsew")
+            self.load_preset2_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset2_settings)
+            self.load_preset2_btn.grid(row=8,column=5,columnspan=1,sticky="nsew")
+
+            self.preset3_label = Label(settings_window, text="Preset 3:", font=("Arial", 18), bg="gray", fg="black")
+            self.preset3_label.grid(row=9, column=1, columnspan=2)
+            self.save_preset3_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset3_settings)
+            self.save_preset3_btn.grid(row=9,column=3,columnspan=1,sticky="nsew")
+            self.load_preset3_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset3_settings)
+            self.load_preset3_btn.grid(row=9,column=5,columnspan=1,sticky="nsew")
 
 #MENU Taskbar
         menu_bar = Menu(root)
@@ -512,7 +589,6 @@ class MainInterface:
         self.relax_session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="mediumseagreen") 
 
         switch_default_mode()
-        # Load settings from database
 
 ###########################################################################################################
 #DEFAULT#
