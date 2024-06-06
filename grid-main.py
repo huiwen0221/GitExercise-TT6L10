@@ -36,20 +36,6 @@ class MainInterface:
             CompletionTime TEXT NOT NULL
         );""")
 
-        # Create Table for User Settings if not exists
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS UserSettings (
-            SettingID INTEGER PRIMARY KEY AUTOINCREMENT,
-            TimerDuration INTEGER NOT NULL,
-            ShortBreakDuration INTEGER NOT NULL,
-            LongBreakDuration INTEGER NOT NULL,
-            RepeatCycles INTEGER NOT NULL,
-            TimerEndSound TEXT NOT NULL,
-            ShortBreakSound TEXT NOT NULL,
-            LongBreakSound TEXT NOT NULL,
-            BackgroundColor TEXT NOT NULL,
-            Volume INTEGER NOT NULL
-        );""")
-
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Presets (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
             TimerDuration INTEGER,
