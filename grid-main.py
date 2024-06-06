@@ -73,7 +73,7 @@ class MainInterface:
         self.study_remaining_time = self.study_timer_duration
         self.study_shortbreak_duration = 900
         self.study_longbreak_duration = 1500
-
+        self.is_music_playing = False
         self.volume = 50
         self.study_type = "study_timer"
         self.study_cycle_count = 0
@@ -114,6 +114,7 @@ class MainInterface:
             self.default_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.default_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
             self.session_type_lbl.grid(row=2, column=2, columnspan=6)
+            self.music_btn.grid(row=0, column=9, sticky="ne")
 
 #Change to Study Mode
         def study_mode():
@@ -126,6 +127,7 @@ class MainInterface:
             self.study_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.study_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
             self.study_session_type_lbl.grid(row=2, column=2, columnspan=6)
+            self.music_btn.grid(row=0, column=9, sticky="ne")
 
 #Change to Relax Mode
         def relax_mode():
@@ -138,6 +140,7 @@ class MainInterface:
             self.relax_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.relax_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" ) 
             self.relax_session_type_lbl.grid(row=2, column=2, columnspan=6)
+            self.music_btn.grid(row=0, column=9, sticky="ne")
 
 #Hide other mode buttons when switching mode
         def hide_frames():
@@ -583,6 +586,10 @@ class MainInterface:
         self.study_session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="cornflowerblue") 
         self.relax_session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="mediumseagreen") 
 
+        # Add background music button
+        self.music_btn = Button(root, text="Music ON",font= ("Times", 16), fg = "black", activebackground = "grey", command=self.toggle_music)
+        # Background music control
+
         switch_default_mode()
 
 ###########################################################################################################
@@ -605,6 +612,17 @@ class MainInterface:
         self.number_cycles = 0  # Initialize number of cycles to zero
         self.current_cycle = 0  #Current cycles is zero
         self.update_cycle_count_label()
+
+    def toggle_music(self):
+        if self.is_music_playing:
+            pygame.mixer.music.stop()
+            self.is_music_playing = False
+            self.music_btn.config(text="Music ON")
+        else:
+            pygame.mixer.music.load("Autumn Garden.mp3")  # Replace with your background music file
+            pygame.mixer.music.play(-1)  # Play the music indefinitely
+            self.is_music_playing = True
+            self.music_btn.config(text="Music OFF")
 
     def complete_pomodoro_session(self, mode, timer_duration, short_break_duration, long_break_duration):
         self.insert_pomodoro_session(mode, 'Timer', timer_duration)
@@ -753,8 +771,21 @@ class MainInterface:
             self.play_sound(self.long_break_sound)
 
     def play_sound(self, sound_file):
-        pygame.mixer.music.load(sound_file)
-        pygame.mixer.music.play()
+        # Pause the background music if it is playing
+        if self.is_music_playing:
+            pygame.mixer.music.pause()
+        
+        # Load and play the ending sound
+        sound = pygame.mixer.Sound(sound_file)
+        sound.play()
+        
+        # Resume the background music after the sound finishes
+        sound_length = sound.get_length() * 1000  # Convert seconds to milliseconds
+        self.root.after(int(sound_length), self.resume_music)
+
+    def resume_music(self):
+        if self.is_music_playing:
+            pygame.mixer.music.unpause()
 
 #################################################################################################################
 #STUDY#
