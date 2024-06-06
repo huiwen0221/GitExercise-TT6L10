@@ -421,55 +421,55 @@ class MainInterface:
 
 #Timer Entry
             self.timer_entry_lbl= Label(settings_window, text="Timer Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
-            self.timer_entry_lbl.grid(row = 0, column=1,columnspan=3)
+            self.timer_entry_lbl.grid(row = 0, column=1,columnspan=3, sticky="w")
 
-            self.timer_entry = Entry(settings_window, font=("Arial",13))
-            self.timer_entry.grid(row = 0, column=4, columnspan=2, padx=10, pady=5)
+            self.timer_entry = Entry(settings_window, font=("Arial",13), width=7)
+            self.timer_entry.grid(row = 0, column=4, columnspan=1, padx=10, pady=5)
             self.timer_entry.insert(0,"25")
 
-            self.timerseconds_entry = Entry(settings_window, font=("Arial",13))
-            self.timerseconds_entry.grid(row = 0, column =7, columnspan =2, padx=10, pady=5)
+            self.timerseconds_entry = Entry(settings_window, font=("Arial",13), width=7)
+            self.timerseconds_entry.grid(row = 0, column =5, columnspan =1, padx=10, pady=5)
             self.timerseconds_entry.insert(0,"00")
 
         #Short Break Entry
             self.shortbreak_entry_lbl= Label(settings_window, text="Short Break Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
-            self.shortbreak_entry_lbl.grid(row = 1, column=1, columnspan=3)
+            self.shortbreak_entry_lbl.grid(row = 1, column=1, columnspan=3, sticky="w")
 
-            self.shortbreak_entry = Entry(settings_window, font=("Arial",13))
-            self.shortbreak_entry.grid(row = 1, column=4, columnspan=2, padx=10, pady=5)
+            self.shortbreak_entry = Entry(settings_window, font=("Arial",13), width=7)
+            self.shortbreak_entry.grid(row = 1, column=4, columnspan=1, padx=10, pady=5)
             self.shortbreak_entry.insert(0,"5")
 
-            self.shortbreakseconds_entry = Entry(settings_window, font=("Arial",13))
-            self.shortbreakseconds_entry.grid(row = 1, column = 7, columnspan=2, padx=10, pady=5)
+            self.shortbreakseconds_entry = Entry(settings_window, font=("Arial",13), width=7)
+            self.shortbreakseconds_entry.grid(row = 1, column = 5, columnspan=1, padx=10, pady=5)
             self.shortbreakseconds_entry.insert(0, "00")
 
         #Long Break Entry
             self.longbreak_entry_lbl= Label(settings_window, text="Long Break Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
-            self.longbreak_entry_lbl.grid(row = 2, column=1, columnspan=3)
+            self.longbreak_entry_lbl.grid(row = 2, column=1, columnspan=3, sticky="w")
 
-            self.longbreak_entry = Entry(settings_window, font=("Arial",13))
-            self.longbreak_entry.grid(row = 2, column=4, columnspan=2, padx=10, pady=5)
+            self.longbreak_entry = Entry(settings_window, font=("Arial",13), width=7)
+            self.longbreak_entry.grid(row = 2, column=4, columnspan=1, padx=10, pady=5)
             self.longbreak_entry.insert(0,"15")
 
-            self.longbreakseconds_entry = Entry(settings_window, font=("Arial",13))
-            self.longbreakseconds_entry.grid(row = 2, column=7, columnspan=2, padx=10, pady=5)
+            self.longbreakseconds_entry = Entry(settings_window, font=("Arial",13), width=7)
+            self.longbreakseconds_entry.grid(row = 2, column=5, columnspan=1, padx=10, pady=5)
             self.longbreakseconds_entry.insert(0, "00")
 
         #Repeat Cycles Entry
             self.repeat_cycles_lbl= Label(settings_window, text="Number of Cycles to Repeat:", font=("Arial",18), bg="gray", fg="black")
-            self.repeat_cycles_lbl.grid(row = 3, column=1, columnspan=3)
+            self.repeat_cycles_lbl.grid(row = 3, column=1, columnspan=3, sticky="w")
 
-            self.repeat_cycles_entry = Entry(settings_window, font=("Arial",13))
-            self.repeat_cycles_entry.grid(row = 3, column=4, columnspan=2, padx=10, pady=5)
+            self.repeat_cycles_entry = Entry(settings_window, font=("Arial",13), width=7)
+            self.repeat_cycles_entry.grid(row = 3, column=4, columnspan=1, padx=10, pady=5)
 
         #RESET Settings Button
-            self.reset_all_btn=Button(settings_window, text="RESET TO ORIGINAL", font=("Arial",15), bg="red", fg="black", activebackground="red", command=reset_default_mode)
+            self.reset_all_btn=Button(settings_window, text="RESET ALL PRESETS", font=("Arial",15), bg="red", fg="black", activebackground="red", command=reset_default_mode)
             self.reset_all_btn.grid(row=9,column=9,columnspan=2,sticky="nsew")
 ##############################################################################################################
 
 #Sounds Settings
             self.sounds_entry_lbl= Label(settings_window, text="Sounds Options:", font=("Arial",18), bg="gray", fg="black")
-            self.sounds_entry_lbl.grid(row = 4, column=1,columnspan=3)
+            self.sounds_entry_lbl.grid(row = 4, column=1,columnspan=3, sticky="w")
 
             alarm_options = ["Default Alarm","Referee Whistle","Chime","Default Short Break","Churchbell","Wind Chimes","Default Microwave", "Great Harp", "Relaxing Harp"]
             SB_options = ["Default Short Break", "Churchbell", "Wind Chimes","Default Alarm","Referee Whistle","Chime","Default Microwave", "Great Harp", "Relaxing Harp"]
@@ -495,38 +495,47 @@ class MainInterface:
             self.selected_SB_sound = "Default Short Break"
             self.selected_LB_sound = "Default Microwave LB"
 
+            self.bg_color_lbl = Label(settings_window, text="Background Color:", font=("Arial",18), bg="gray", fg="black")
+            self.bg_color_lbl.grid(row = 5, column=1,columnspan=3, sticky="w")
             self.bg_color_btn = Button(settings_window, text="Background Color", font=("Arial",13), bg="white", fg="black", command=open_color)
             self.bg_color_btn.grid(row=5, column=4, columnspan =2)
 
             # Volume Slider
             volume_label = Label(settings_window, text="Sound Volume:", font=("Arial", 18), bg="gray", fg="black")
-            volume_label.grid(row=6, column=1, columnspan=3)
+            volume_label.grid(row=6, column=1, columnspan=3, sticky="w")
 
             self.volume_slider = Scale(settings_window, from_=0, to=100, orient=HORIZONTAL, command=update_volume, font=("Arial", 13))
             self.volume_slider.set(self.volume)
             self.volume_slider.grid(row=6, column=4, columnspan=3)
 
             self.volume_label = Label(settings_window, text=f"Volume: {self.volume}%", font=("Arial", 17), bg="gray", fg="black")
-            self.volume_label.grid(row=6, column=7, columnspan=2)
+            self.volume_label.grid(row=6, column=7, columnspan=2, sticky="w")
 
             self.preset1_label = Label(settings_window, text="Preset 1:", font=("Arial", 18), bg="gray", fg="black")
-            self.preset1_label.grid(row=7, column=1, columnspan=2)
-            self.save_preset1_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset1_settings)
+            self.preset1_label.grid(row=7, column=1, columnspan=2, sticky="w")
+
+            self.save_preset1_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset1_settings, borderwidth=2, relief="raised")
             self.save_preset1_btn.grid(row=7,column=3,columnspan=1,sticky="nsew")
+            self.save_preset1_btn.configure(highlightbackground="blue", highlightcolor="blue", highlightthickness=2)
+
             self.load_preset1_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset1_settings)
             self.load_preset1_btn.grid(row=7,column=5,columnspan=1,sticky="nsew")
 
             self.preset2_label = Label(settings_window, text="Preset 2:", font=("Arial", 18), bg="gray", fg="black")
-            self.preset2_label.grid(row=8, column=1, columnspan=2)
+            self.preset2_label.grid(row=8, column=1, columnspan=2, sticky="w")
+
             self.save_preset2_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset2_settings)
             self.save_preset2_btn.grid(row=8,column=3,columnspan=1,sticky="nsew")
+
             self.load_preset2_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset2_settings)
             self.load_preset2_btn.grid(row=8,column=5,columnspan=1,sticky="nsew")
 
             self.preset3_label = Label(settings_window, text="Preset 3:", font=("Arial", 18), bg="gray", fg="black")
-            self.preset3_label.grid(row=9, column=1, columnspan=2)
+            self.preset3_label.grid(row=9, column=1, columnspan=2, sticky="w")
+
             self.save_preset3_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset3_settings)
             self.save_preset3_btn.grid(row=9,column=3,columnspan=1,sticky="nsew")
+
             self.load_preset3_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset3_settings)
             self.load_preset3_btn.grid(row=9,column=5,columnspan=1,sticky="nsew")
 
