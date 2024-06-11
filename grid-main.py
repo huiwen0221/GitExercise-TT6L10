@@ -127,7 +127,7 @@ class MainInterface:
             self.study_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.study_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
             self.study_session_type_lbl.grid(row=2, column=2, columnspan=6)
-            self.music_btn.grid(row=0, column=9, sticky="ne")
+
 
 #Change to Relax Mode
         def relax_mode():
@@ -140,7 +140,7 @@ class MainInterface:
             self.relax_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
             self.relax_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" ) 
             self.relax_session_type_lbl.grid(row=2, column=2, columnspan=6)
-            self.music_btn.grid(row=0, column=9, sticky="ne")
+
 
 #Hide other mode buttons when switching mode
         def hide_frames():
@@ -151,6 +151,7 @@ class MainInterface:
             self.default_reset_btn.grid_forget()
             self.cycles_lbl.grid_forget()
             self.session_type_lbl.grid_forget()
+            self.music_btn.grid_forget()
 
             self.study_timer_lbl.grid_forget()
 
@@ -630,6 +631,7 @@ class MainInterface:
             self.insert_pomodoro_session(mode, 'Short Break', short_break_duration)
         if long_break_duration is not None:
             self.insert_pomodoro_session(mode, 'Long Break', long_break_duration)
+        self.conn.commit()
 
     def defaultmode_timer(self): #25 mins
         self.default_remaining_time = self.default_timer_duration
@@ -1051,6 +1053,7 @@ class MainInterface:
         INSERT INTO PomodoroSessions (User, Mode, SessionType, Duration, CompletionTime)
         VALUES (?, ?, ?, ?, ?)
         ''', (user, mode, session_type, duration, completion_time))
+        self.conn.commit()
 
 if __name__ == "__main__":
     root = Tk()
