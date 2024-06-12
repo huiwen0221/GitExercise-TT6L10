@@ -5,18 +5,24 @@ from datetime import datetime
 from tkinter import ttk
 from tkinter import colorchooser
 import pygame
-
+from tkinter import PhotoImage
+from tkinter import messagebox
 
 
 class MainInterface:
     def __init__(self,root):
         self.root = root
         self.root.title("Pomodoro Helper")
-        self.root.geometry("700x500")
+        self.root.geometry("1000x700")
         self.root.configure(bg = "IndianRed")
+
+        self.window_icon = PhotoImage(file="Button Images/pomodoro helper.png")
+        self.root.iconphoto(False,self.window_icon)
 
         pygame.init()
         pygame.mixer.init()
+        global counter
+        counter=1
 
         #Defining Grid 
         self.root.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
@@ -50,15 +56,15 @@ class MainInterface:
         );""")
 
         self.sound_files = {
-            "Default Alarm": "Default Timer Alarm.wav",
-            "Referee Whistle": "Study Referee Alarm.wav",
-            "Chime": "Relax Chime Alarm.wav",
-            "Default Short Break": "Default SB.wav",
-            "Churchbell": "Study Churchbell SB.wav",
-            "Wind Chimes": "Relax WindChimes SB.wav",
-            "Default Microwave": "Default Microwave LB.wav",
-            "Great Harp": "Study Great Harp LB.wav",
-            "Relaxing Harp": "Relax Harp LB.wav"
+            "Default Alarm": "Sounds/Default Timer Alarm.wav",
+            "Referee Whistle": "Sounds/Study Referee Alarm.wav",
+            "Chime": "Sounds/Relax Chime Alarm.wav",
+            "Default Short Break": "Sounds/Default SB.wav",
+            "Churchbell": "Sounds/Study Churchbell SB.wav",
+            "Wind Chimes": "Sounds/Relax WindChimes SB.wav",
+            "Default Microwave": "Sounds/Default Microwave LB.wav",
+            "Great Harp": "Sounds/Study Great Harp LB.wav",
+            "Relaxing Harp": "Sounds/Relax Harp LB.wav"
         }
 
         self.timer_end_sound = self.sound_files["Default Alarm"]
@@ -107,40 +113,38 @@ class MainInterface:
         def switch_default_mode():
             root.config(bg="IndianRed")
             hide_frames()
-            self.timer_lbl.grid(row=1,column=2,rowspan=6,columnspan=6,)
-            self.cycles_lbl.grid(row=0, column=4, columnspan = 2)
-
-            self.default_start_btn.grid(row =9 , column =2, columnspan =2, sticky="nsew" )
-            self.default_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
-            self.default_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
-            self.session_type_lbl.grid(row=2, column=2, columnspan=6)
-            self.music_btn.grid(row=0, column=9, sticky="ne")
+            self.timer_lbl.grid(row=1,column=2, rowspan=6,columnspan=6,sticky="nsew")
+            self.default_start_btn.grid(row=6, column =2,rowspan=3,columnspan=2,sticky="nsew")
+            self.default_stop_btn.grid(row=6, column =4,rowspan=3,columnspan=2,sticky="nsew")
+            self.default_reset_btn.grid(row=6, column =6,rowspan=3,columnspan=2,sticky="nsew")
+            self.music_btn.grid(row=0, column=9, sticky="nsew")
+            self.session_type_img.grid(row=1, column=9,sticky="nsew")
+            self.session_type_lbl.grid(row=2, column=9,sticky="nsew")
+            self.cycles_lbl.grid(row=3, column=9,sticky="nsew")
 
 #Change to Study Mode
         def study_mode():
             root.config(bg="Cornflowerblue")
             hide_frames()
 
-            self.study_timer_lbl.grid(row=1,column=2,rowspan=6,columnspan=6,)
-
-            self.study_start_btn.grid(row =9 , column =2, columnspan =2, sticky="nsew" )
-            self.study_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
-            self.study_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" )
-            self.study_session_type_lbl.grid(row=2, column=2, columnspan=6)
-
+            self.study_timer_lbl.grid(row=1,column=2, rowspan=6,columnspan=6,sticky="nsew")
+            self.study_start_btn.grid(row=6, column =2,rowspan=3,columnspan=2,sticky="nsew")
+            self.study_stop_btn.grid(row=6, column =4,rowspan=3,columnspan=2,sticky="nsew")
+            self.study_reset_btn.grid(row=6, column =6,rowspan=3,columnspan=2,sticky="nsew")
+            self.studysession_type_img.grid(row=3, column=9,sticky="nsew")
+            self.study_session_type_lbl.grid(row=4, column=9,sticky="nsew")
 
 #Change to Relax Mode
         def relax_mode():
             root.config(bg="mediumseagreen")
             hide_frames()
 
-            self.relax_timer_lbl.grid(row=1,column=2,rowspan=6,columnspan=6,)
-
-            self.relax_start_btn.grid(row =9 , column =2, columnspan =2, sticky="nsew" )
-            self.relax_stop_btn.grid(row =9 , column =4 , columnspan =2, sticky="nsew" )
-            self.relax_reset_btn.grid(row =9 , column =6 , columnspan =2, sticky="nsew" ) 
-            self.relax_session_type_lbl.grid(row=2, column=2, columnspan=6)
-
+            self.relax_timer_lbl.grid(row=1,column=2, rowspan=6,columnspan=6,sticky="nsew")
+            self.relax_start_btn.grid(row=6, column =2,rowspan=3,columnspan=2,sticky="nsew")
+            self.relax_stop_btn.grid(row=6, column =4,rowspan=3,columnspan=2,sticky="nsew")
+            self.relax_reset_btn.grid(row=6, column =6,rowspan=3,columnspan=2,sticky="nsew") 
+            self.relaxsession_type_img.grid(row=3, column=9,sticky="nsew")
+            self.relax_session_type_lbl.grid(row=4, column=9,sticky="nsew")
 
 #Hide other mode buttons when switching mode
         def hide_frames():
@@ -150,6 +154,7 @@ class MainInterface:
             self.default_stop_btn.grid_forget()
             self.default_reset_btn.grid_forget()
             self.cycles_lbl.grid_forget()
+            self.session_type_img.grid_forget()
             self.session_type_lbl.grid_forget()
             self.music_btn.grid_forget()
 
@@ -159,6 +164,7 @@ class MainInterface:
             self.study_stop_btn.grid_forget()
             self.study_reset_btn.grid_forget()
             self.study_session_type_lbl.grid_forget()
+            self.studysession_type_img.grid_forget()
 
             self.relax_timer_lbl.grid_forget()
 
@@ -166,6 +172,7 @@ class MainInterface:
             self.relax_stop_btn.grid_forget()
             self.relax_reset_btn.grid_forget()
             self.relax_session_type_lbl.grid_forget()
+            self.relaxsession_type_img.grid_forget()
 
         def open_color():
             # Open color picker dialog
@@ -175,15 +182,20 @@ class MainInterface:
                 new_bg_color = color[1]  # Get the hexadecimal color code
             # Update background color of specified elements
             root.configure(bg=new_bg_color)
+            self.default_start_btn.configure(bg=new_bg_color)
+            self.default_stop_btn.configure(bg=new_bg_color)
+            self.default_reset_btn.configure(bg=new_bg_color)
             self.timer_lbl.configure(bg=new_bg_color)
+            self.music_btn.configure(bg=new_bg_color)
             self.cycles_lbl.configure(bg=new_bg_color)
+            self.session_type_img.configure(bg=new_bg_color)
             self.session_type_lbl.configure(bg=new_bg_color)
             self.background_color = new_bg_color
 
         def update_volume(val):
             volume = int(val) / 100  # Scale to 0-1 for pygame
             pygame.mixer.music.set_volume(volume)
-            self.volume_label.config(text=f"Volume: {val}%")
+            self.volume_label.config(text=f": {val}%")
 
         def save_preset1_settings():
             save_preset_settings(1)
@@ -400,134 +412,195 @@ class MainInterface:
 
 #Settings Window
         def open_settings():
-            settings_window = Toplevel(root)
-            settings_window.title("Settings")
-            settings_window.geometry("500x500")
-            settings_window.configure(bg ="gray")
+            global counter
 
-            settings_window.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
-            settings_window.rowconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform='a')
-#####################################################################################################################
+#Limiting Settings Window to only be opened one time
+            if counter <2:
+                settings_window = Toplevel(root)
+                settings_window.title("Settings")
+                settings_window.geometry("500x500")
+                settings_window.configure(bg ="gray")
 
-#Timer Entry
-            self.timer_entry_lbl= Label(settings_window, text="Timer Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
-            self.timer_entry_lbl.grid(row = 0, column=1,columnspan=3, sticky="w")
+                self.settingswindow_icon = PhotoImage(file="Button Images/user setting1.png")
+                settings_window.iconphoto(False,self.settingswindow_icon)       
 
-            self.timer_entry = Entry(settings_window, font=("Arial",13), width=7)
-            self.timer_entry.grid(row = 0, column=4, columnspan=1, padx=10, pady=5)
-            self.timer_entry.insert(0,"25")
+                settings_window.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
+                settings_window.rowconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform='a')
 
-            self.timerseconds_entry = Entry(settings_window, font=("Arial",13), width=7)
-            self.timerseconds_entry.grid(row = 0, column =5, columnspan =1, padx=10, pady=5)
-            self.timerseconds_entry.insert(0,"00")
+#TIMER DURATION ENTRYBOX
+                self.timersetting_icon = PhotoImage(file="Button Images/timer.png")
+                self.timersetting_img_lbl = Label(settings_window, image=self.timersetting_icon,bg="gray")
+                self.timersetting_img_lbl.grid(row = 0, column=0,sticky="w")
+                self.timer_entry_lbl= Label(settings_window, text="Timer Duration:", font=("Arial",18), bg="gray", fg="black")
+                self.timer_entry_lbl.grid(row = 0, column=1,columnspan=2, sticky="w")
 
-        #Short Break Entry
-            self.shortbreak_entry_lbl= Label(settings_window, text="Short Break Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
-            self.shortbreak_entry_lbl.grid(row = 1, column=1, columnspan=3, sticky="w")
+                self.timer_entry = Entry(settings_window, font=("Arial",13), bg="lightgray",width=7,borderwidth=4, relief="sunken",highlightthickness=2, highlightbackground="gray",highlightcolor="black")
+                self.timer_entry.grid(row = 0, column=3, columnspan=1,sticky="w")
+                self.timer_entry.insert(0,"25")
 
-            self.shortbreak_entry = Entry(settings_window, font=("Arial",13), width=7)
-            self.shortbreak_entry.grid(row = 1, column=4, columnspan=1, padx=10, pady=5)
-            self.shortbreak_entry.insert(0,"5")
+                self.timerseconds_entry = Entry(settings_window, font=("Arial",13),bg="lightgray",width=7,borderwidth=4, relief="sunken",highlightthickness=2, highlightbackground="gray",highlightcolor="black")
+                self.timerseconds_entry.grid(row = 0, column=4, columnspan =1,sticky="w")
+                self.timerseconds_entry.insert(0,"00")
 
-            self.shortbreakseconds_entry = Entry(settings_window, font=("Arial",13), width=7)
-            self.shortbreakseconds_entry.grid(row = 1, column = 5, columnspan=1, padx=10, pady=5)
-            self.shortbreakseconds_entry.insert(0, "00")
+    #SHORT BREAK DURATION ENTRYBOX
+                self.shortbreaksetting_icon = PhotoImage(file="Button Images/short break.png")
+                self.shortbreaksetting_img_lbl = Label(settings_window, image=self.shortbreaksetting_icon,bg="gray")
+                self.shortbreaksetting_img_lbl.grid(row = 1, column=0,sticky="w")
+                self.shortbreak_entry_lbl= Label(settings_window, text="Short Break Duration:", font=("Arial",18), bg="gray", fg="black")
+                self.shortbreak_entry_lbl.grid(row = 1, column=1, columnspan=2, sticky="w")
 
-        #Long Break Entry
-            self.longbreak_entry_lbl= Label(settings_window, text="Long Break Duration (min:sec)", font=("Arial",18), bg="gray", fg="black")
-            self.longbreak_entry_lbl.grid(row = 2, column=1, columnspan=3, sticky="w")
+                self.shortbreak_entry = Entry(settings_window, font=("Arial",13), bg="lightgray",width=7,borderwidth=4, relief="sunken",highlightthickness=2, highlightbackground="gray",highlightcolor="black")
+                self.shortbreak_entry.grid(row = 1, column=3, columnspan=1,sticky="w")
+                self.shortbreak_entry.insert(0,"5")
 
-            self.longbreak_entry = Entry(settings_window, font=("Arial",13), width=7)
-            self.longbreak_entry.grid(row = 2, column=4, columnspan=1, padx=10, pady=5)
-            self.longbreak_entry.insert(0,"15")
+                self.shortbreakseconds_entry = Entry(settings_window, font=("Arial",13),bg="lightgray",width=7,borderwidth=4, relief="sunken",highlightthickness=2, highlightbackground="gray",highlightcolor="black")
+                self.shortbreakseconds_entry.grid(row = 1, column=4, columnspan=1,sticky="w")
+                self.shortbreakseconds_entry.insert(0, "00")
 
-            self.longbreakseconds_entry = Entry(settings_window, font=("Arial",13), width=7)
-            self.longbreakseconds_entry.grid(row = 2, column=5, columnspan=1, padx=10, pady=5)
-            self.longbreakseconds_entry.insert(0, "00")
+    #LONG BREAK DURATION ENTRYBOX
+                self.longbreaksetting_icon = PhotoImage(file="Button Images/long break.png")
+                self.longbreaksetting_img_lbl = Label(settings_window, image=self.longbreaksetting_icon,bg="gray")
+                self.longbreaksetting_img_lbl.grid(row =2, column=0,sticky="w")
+                self.longbreak_entry_lbl= Label(settings_window, text="Long Break Duration:", font=("Arial",18), bg="gray", fg="black")
+                self.longbreak_entry_lbl.grid(row = 2, column=1, columnspan=2, sticky="w")
 
-        #Repeat Cycles Entry
-            self.repeat_cycles_lbl= Label(settings_window, text="Number of Cycles to Repeat:", font=("Arial",18), bg="gray", fg="black")
-            self.repeat_cycles_lbl.grid(row = 3, column=1, columnspan=3, sticky="w")
+                self.longbreak_entry = Entry(settings_window, font=("Arial",13),bg="lightgray",width=7,borderwidth=4, relief="sunken",highlightthickness=2, highlightbackground="gray",highlightcolor="black")
+                self.longbreak_entry.grid(row = 2, column=3, columnspan=1,sticky="w")
+                self.longbreak_entry.insert(0,"15")
 
-            self.repeat_cycles_entry = Entry(settings_window, font=("Arial",13), width=7)
-            self.repeat_cycles_entry.grid(row = 3, column=4, columnspan=1, padx=10, pady=5)
+                self.longbreakseconds_entry = Entry(settings_window, font=("Arial",13),bg="lightgray",width=7,borderwidth=4, relief="sunken",highlightthickness=2, highlightbackground="gray",highlightcolor="black")
+                self.longbreakseconds_entry.grid(row = 2, column=4, columnspan=1,sticky="w")
+                self.longbreakseconds_entry.insert(0, "00")
 
-        #RESET Settings Button
-            self.reset_all_btn=Button(settings_window, text="RESET ALL PRESETS", font=("Arial",15), bg="red", fg="black", activebackground="red", command=reset_default_mode)
-            self.reset_all_btn.grid(row=9,column=9,columnspan=2,sticky="nsew")
-##############################################################################################################
+    #REPEAT CYCLES ENTRYBOX
+                self.repeat_cycles_icon = PhotoImage(file="Button Images/tomato cycle.png")
+                self.repeat_cycles_img_lbl = Label(settings_window, image=self.repeat_cycles_icon,bg="gray")
+                self.repeat_cycles_img_lbl.grid(row =3, column=0,sticky="w")
+                self.repeat_cycles_lbl= Label(settings_window, text="Times to Repeat:", font=("Arial",18), bg="gray", fg="black")
+                self.repeat_cycles_lbl.grid(row = 3, column=1, columnspan=2, sticky="w")
 
-#Sounds Settings
-            self.sounds_entry_lbl= Label(settings_window, text="Sounds Options:", font=("Arial",18), bg="gray", fg="black")
-            self.sounds_entry_lbl.grid(row = 4, column=1,columnspan=3, sticky="w")
+                self.repeat_cycles_entry = Entry(settings_window, font=("Arial",13),bg="lightgray",width=7,borderwidth=4, relief="sunken",highlightthickness=2, highlightbackground="gray",highlightcolor="black")
+                self.repeat_cycles_entry.grid(row = 3, column=3, columnspan=1,sticky="w")
 
-            alarm_options = ["Default Alarm","Referee Whistle","Chime","Default Short Break","Churchbell","Wind Chimes","Default Microwave", "Great Harp", "Relaxing Harp"]
-            SB_options = ["Default Short Break", "Churchbell", "Wind Chimes","Default Alarm","Referee Whistle","Chime","Default Microwave", "Great Harp", "Relaxing Harp"]
-            LB_options = ["Default Microwave", "Great Harp", "Relaxing Harp","Default Alarm","Referee Whistle","Chime","Default Short Break","Churchbell","Wind Chimes"]
+    #RESET PRESETS
+                self.reset_all_icon = PhotoImage(file="Button Images/reset all.png")
+                self.reset_all_btn=Button(settings_window, image=self.reset_all_icon, command=reset_default_mode,borderwidth=0,bg="gray", activebackground ="gray", highlightthickness=0)
+                self.reset_all_btn.grid(row=8,column=8,columnspan=2,rowspan=2,sticky="se")
 
-            self.alarm_sound_combobox = ttk.Combobox(settings_window, values=alarm_options, font=("Arial",13))
-            self.alarm_sound_combobox.current(0)
-            self.alarm_sound_combobox.grid(row=4, column=4, columnspan=2)
+    #ENDING SOUNDS COMBOBOX
+                self.sounds_icon = PhotoImage(file="Button Images/sounds setting.png")
+                self.sounds_img_lbl = Label(settings_window, image=self.sounds_icon,bg="gray")
+                self.sounds_img_lbl.grid(row =4, column=0,sticky="w")
+                self.sounds_entry_lbl= Label(settings_window, text="Ending Sounds:", font=("Arial",18), bg="gray", fg="black")
+                self.sounds_entry_lbl.grid(row = 4, column=1,columnspan=2, sticky="w")
 
-            self.SB_sound_combobox = ttk.Combobox(settings_window, values=SB_options, font=("Arial",13))
-            self.SB_sound_combobox.current(0)
-            self.SB_sound_combobox.grid(row=4, column=6, columnspan=2)
+                alarm_options = ["Default Alarm","Referee Whistle","Chime","Default Short Break","Churchbell","Wind Chimes","Default Microwave", "Great Harp", "Relaxing Harp"]
+                SB_options = ["Default Short Break", "Churchbell", "Wind Chimes","Default Alarm","Referee Whistle","Chime","Default Microwave", "Great Harp", "Relaxing Harp"]
+                LB_options = ["Default Microwave", "Great Harp", "Relaxing Harp","Default Alarm","Referee Whistle","Chime","Default Short Break","Churchbell","Wind Chimes"]
 
-            self.LB_sound_combobox = ttk.Combobox(settings_window, values=LB_options, font=("Arial",13))
-            self.LB_sound_combobox.current(0)
-            self.LB_sound_combobox.grid(row=4, column=8, columnspan=2)
+                self.alarm_sound_combobox = ttk.Combobox(settings_window, values=alarm_options, font=("Arial",13),width=13)
+                self.alarm_sound_combobox.current(0)
+                self.alarm_sound_combobox.grid(row=4, column=3, columnspan=2,sticky="w")
 
-            self.alarm_sound_combobox.bind("<<ComboboxSelected>>")
-            self.SB_sound_combobox.bind("<<ComboboxSelected>>")
-            self.LB_sound_combobox.bind("<<ComboboxSelected>>")
+                self.SB_sound_combobox = ttk.Combobox(settings_window, values=SB_options, font=("Arial",13),width=13)
+                self.SB_sound_combobox.current(0)
+                self.SB_sound_combobox.grid(row=4, column=5, columnspan=2,sticky="w")
 
-            self.selected_alarm_sound = "Default Alarm"
-            self.selected_SB_sound = "Default Short Break"
-            self.selected_LB_sound = "Default Microwave LB"
+                self.LB_sound_combobox = ttk.Combobox(settings_window, values=LB_options, font=("Arial",13),width=13)
+                self.LB_sound_combobox.current(0)
+                self.LB_sound_combobox.grid(row=4, column=7, columnspan=2,sticky="w")
 
-            self.bg_color_lbl = Label(settings_window, text="Background Color:", font=("Arial",18), bg="gray", fg="black")
-            self.bg_color_lbl.grid(row = 5, column=1,columnspan=3, sticky="w")
-            self.bg_color_btn = Button(settings_window, text="Background Color", font=("Arial",13), bg="white", fg="black", command=open_color)
-            self.bg_color_btn.grid(row=5, column=4, columnspan =2)
+                self.alarm_sound_combobox.bind("<<ComboboxSelected>>")
+                self.SB_sound_combobox.bind("<<ComboboxSelected>>")
+                self.LB_sound_combobox.bind("<<ComboboxSelected>>")
 
-            # Volume Slider
-            volume_label = Label(settings_window, text="Sound Volume:", font=("Arial", 18), bg="gray", fg="black")
-            volume_label.grid(row=6, column=1, columnspan=3, sticky="w")
+                self.selected_alarm_sound = "Default Alarm"
+                self.selected_SB_sound = "Default Short Break"
+                self.selected_LB_sound = "Default Microwave LB"
 
-            self.volume_slider = Scale(settings_window, from_=0, to=100, orient=HORIZONTAL, command=update_volume, font=("Arial", 13))
-            self.volume_slider.set(self.volume)
-            self.volume_slider.grid(row=6, column=4, columnspan=3)
+    #BACKGROUND COLOR
+                self.backgroundcolor_icon = PhotoImage(file="Button Images/bg color.png")
+                self.backgroundcolor_img_lbl = Label(settings_window, image=self.backgroundcolor_icon,bg="gray")
+                self.backgroundcolor_img_lbl.grid(row =5, column=0,sticky="w")
+                self.bg_color_lbl = Label(settings_window, text="Background Color:", font=("Arial",18), bg="gray", fg="black")
+                self.bg_color_lbl.grid(row = 5, column=1,columnspan=2, sticky="w")
 
-            self.volume_label = Label(settings_window, text=f"Volume: {self.volume}%", font=("Arial", 17), bg="gray", fg="black")
-            self.volume_label.grid(row=6, column=7, columnspan=2, sticky="w")
+                self.bg_color_btn = Button(settings_window, text="Background Color", font=("Arial",13), bg="indianred", fg="black",activebackground="white", command=open_color)
+                self.bg_color_btn.grid(row=5, column=3, columnspan=2, sticky="w")
 
-            self.preset1_label = Label(settings_window, text="Preset 1:", font=("Arial", 18), bg="gray", fg="black")
-            self.preset1_label.grid(row=7, column=1, columnspan=2, sticky="w")
+    #VOLUME SLIDER
+                self.volume_icon = PhotoImage(file="Button Images/volume.png")
+                self.volume_img_lbl = Label(settings_window, image=self.volume_icon,bg="gray")
+                self.volume_img_lbl.grid(row =6, column=0,sticky="w")
+                volume_label = Label(settings_window, text="Sound Volume:", font=("Arial", 18), bg="gray", fg="black")
+                volume_label.grid(row=6, column=1, columnspan=3, sticky="w")
 
-            self.save_preset1_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset1_settings, borderwidth=2, relief="raised")
-            self.save_preset1_btn.grid(row=7,column=3,columnspan=1,sticky="nsew")
-            self.save_preset1_btn.configure(highlightbackground="blue", highlightcolor="blue", highlightthickness=2)
+                self.volume_slider = Scale(settings_window, from_=0, to=100, orient=HORIZONTAL, command=update_volume, font=("Arial", 13))
+                self.volume_slider.set(self.volume)
+                self.volume_slider.grid(row=6, column=2, columnspan=3)
 
-            self.load_preset1_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset1_settings)
-            self.load_preset1_btn.grid(row=7,column=5,columnspan=1,sticky="nsew")
+                self.volume2_icon = PhotoImage(file="Button Images/vol lbl.png")
+                self.volume_label = Label(settings_window,text="",image=self.volume2_icon,compound="left", font=("Courier New", 16,"bold"), fg="black", bg="gray")
+                self.volume_label.grid(row=6, column=5, columnspan=2, sticky="w")
 
-            self.preset2_label = Label(settings_window, text="Preset 2:", font=("Arial", 18), bg="gray", fg="black")
-            self.preset2_label.grid(row=8, column=1, columnspan=2, sticky="w")
+    #PRESET 1 (SAVE AND LOAD)
+                self.preset1_icon = PhotoImage(file="Button Images/preset 1.png")
+                self.preset1_img_lbl = Label(settings_window, image=self.preset1_icon,bg="gray")
+                self.preset1_img_lbl.grid(row=7,column=0,sticky="w")
 
-            self.save_preset2_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset2_settings)
-            self.save_preset2_btn.grid(row=8,column=3,columnspan=1,sticky="nsew")
+                self.preset1_label = Label(settings_window, text="Preset 1:", font=("Arial", 18), bg="gray", fg="black")
+                self.preset1_label.grid(row=7, column=1, columnspan=2, sticky="w")
 
-            self.load_preset2_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset2_settings)
-            self.load_preset2_btn.grid(row=8,column=5,columnspan=1,sticky="nsew")
+                self.save_preset1_icon = PhotoImage(file="Button Images/save preset1.png")
 
-            self.preset3_label = Label(settings_window, text="Preset 3:", font=("Arial", 18), bg="gray", fg="black")
-            self.preset3_label.grid(row=9, column=1, columnspan=2, sticky="w")
+                self.save_preset1_btn=Button(settings_window, image=self.save_preset1_icon,bg="gray",command=save_preset1_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
+                self.save_preset1_btn.grid(row=7,column=3,columnspan=1,sticky="w")
 
-            self.save_preset3_btn=Button(settings_window, text="Save", font=("Arial",10), bg="white", fg="black", command=save_preset3_settings)
-            self.save_preset3_btn.grid(row=9,column=3,columnspan=1,sticky="nsew")
+                self.load_preset1_icon = PhotoImage(file="Button Images/load preset1.png")
 
-            self.load_preset3_btn=Button(settings_window, text="Load", font=("Arial",10), bg="white", fg="black", command=load_preset3_settings)
-            self.load_preset3_btn.grid(row=9,column=5,columnspan=1,sticky="nsew")
+                self.load_preset1_btn=Button(settings_window, image=self.load_preset1_icon,bg="gray",command=load_preset1_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
+                self.load_preset1_btn.grid(row=7,column=4,columnspan=1,sticky="w")
+
+    #PRESET 2 (SAVE AND LOAD)
+                self.preset2_icon = PhotoImage(file="Button Images/preset 2.png")
+                self.preset2_img_lbl = Label(settings_window, image=self.preset2_icon,bg="gray")
+                self.preset2_img_lbl.grid(row=8,column=0,sticky="w")
+
+                self.preset2_label = Label(settings_window, text="Preset 2:", font=("Arial", 18), bg="gray", fg="black")
+                self.preset2_label.grid(row=8, column=1, columnspan=2, sticky="w")
+
+                self.save_preset2_icon = PhotoImage(file="Button Images/save preset2.png")
+
+                self.save_preset2_btn=Button(settings_window, image=self.save_preset2_icon,bg="gray",command=save_preset2_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
+                self.save_preset2_btn.grid(row=8,column=3,columnspan=1,sticky="w")
+
+                self.load_preset2_icon = PhotoImage(file="Button Images/load preset2.png")
+
+                self.load_preset2_btn=Button(settings_window, image=self.load_preset2_icon,bg="gray",command=load_preset2_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
+                self.load_preset2_btn.grid(row=8,column=4,columnspan=1,sticky="w")
+
+    #PRESET 3 (SAVE AND LOAD)
+                self.preset3_icon = PhotoImage(file="Button Images/preset 3.png")
+                self.preset3_img_lbl = Label(settings_window, image=self.preset3_icon,bg="gray")
+                self.preset3_img_lbl.grid(row=9,column=0,sticky="w")
+
+                self.preset3_label = Label(settings_window, text="Preset 3:", font=("Arial", 18), bg="gray", fg="black")
+                self.preset3_label.grid(row=9, column=1, columnspan=2, sticky="w")
+
+                self.save_preset3_icon = PhotoImage(file="Button Images/save preset3.png")
+
+                self.save_preset3_btn=Button(settings_window, image=self.save_preset3_icon,bg="gray",command=save_preset3_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
+                self.save_preset3_btn.grid(row=9,column=3,columnspan=1,sticky="w")
+
+                self.load_preset3_icon = PhotoImage(file="Button Images/load preset3.png")
+
+                self.load_preset3_btn=Button(settings_window, image=self.load_preset3_icon,bg="gray",command=load_preset3_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
+                self.load_preset3_btn.grid(row=9,column=4,columnspan=1,sticky="w")
+
+                counter+=1
+            else:
+                messagebox.showinfo("Error","There is already a Settings window opened.")
+
 
 #MENU Taskbar
         menu_bar = Menu(root)
@@ -536,59 +609,81 @@ class MainInterface:
      #User Menu (Statistics, Achievements, Calendar, Study List)
         user_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="User", menu=user_menu)
-        user_menu.add_command(label="Statistics", command=user_data)
-        user_menu.add_command(label="Achievements", command=badges_user)
+        self.statistics_icon=PhotoImage(file="Button Images/statistics.png")
+        user_menu.add_command(label="Statistics",image=self.statistics_icon,compound="left", command=user_data)
+        self.achievements_icon=PhotoImage(file="Button Images/achievements.png")
+        user_menu.add_command(label="Achievements",image=self.achievements_icon,compound="left", command=badges_user)
         user_menu.add_separator()
-        user_menu.add_command(label="Calendar", command=calendar_user)
-        user_menu.add_command(label="Study List", command=studylist_user)
+        self.calendar_icon=PhotoImage(file="Button Images/calendar.png")
+        user_menu.add_command(label="Calendar",image=self.calendar_icon,compound="left", command=calendar_user)
+        self.studylist_icon=PhotoImage(file="Button Images/studylist.png")
+        user_menu.add_command(label="Study List",image=self.studylist_icon,compound="left", command=studylist_user)
 
     #Mode Menu (Default, Study, Relax)
         mode_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Mode", menu=mode_menu)
-        mode_menu.add_command(label="Default Mode", command=switch_default_mode)
-        mode_menu.add_command(label="Study Mode", command=study_mode)
-        mode_menu.add_command(label="Relax Mode", command=relax_mode)
+        self.default_icon=PhotoImage(file="Button Images/defaultmode.png")
+        mode_menu.add_command(label="Default Mode",image=self.default_icon,compound="left", command=switch_default_mode)
+        mode_menu.add_separator()
+        self.study_icon=PhotoImage(file="Button Images/studymode.png")
+        mode_menu.add_command(label="Study Mode",image=self.study_icon,compound="left", command=study_mode)
+        mode_menu.add_separator()
+        self.relax_icon=PhotoImage(file="Button Images/relaxmode.png")
+        mode_menu.add_command(label="Relax Mode",image=self.relax_icon,compound="left", command=relax_mode)
 
     #Settings Menu(Open new settings window)
         setting_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Settings",menu=setting_menu)
-
-        setting_menu.add_command(label="Open", command=open_settings)
+        self.opensettings_icon=PhotoImage(file="Button Images/open settings.png")
+        setting_menu.add_command(label="Open",image=self.opensettings_icon,compound="left", command=open_settings)
 
     #Default Mode Buttons and Label
-        self.timer_lbl = Label(root, text = "25:00", font= ("Times", 100,), fg ="black", bg = "IndianRed")
-        self.cycles_lbl = Label(root, text="Cycles:", font=("Times", 16), fg="black", bg="IndianRed")
-        self.defaultcurrent_SB_lbl = Label(root, text="Lets take a Short Break!", font=("Times", 16), fg="black", bg="IndianRed")
-        self.defaultcurrent_LB_lbl = Label(root, text="Lets take a Long Break!", font=("Times", 16), fg="black", bg="IndianRed")
+        self.timer_lbl = Label(root, text = "25:00", font= ("Digital-7", 150,), fg ="black", bg = "IndianRed")
 
-        self.default_start_btn = Button(text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.start_default_time)
-        self.default_stop_btn = Button(text = "Stop", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.pause_default_time)
-        self.default_reset_btn = Button(text = "Reset", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.reset_default_time)
+        self.tomato_cycle_icon = PhotoImage(file="Button Images/tomato cycle.png")
+        self.cycles_lbl = Label(root, text="",image=self.tomato_cycle_icon,compound="left", font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
+
+        self.start_icon = PhotoImage(file="Button Images/start2.png")
+        self.stop_icon = PhotoImage(file="Button Images/stop.png")
+        self.reset_icon = PhotoImage(file="Button Images/repeat3.png")
+
+        self.default_start_btn = Button(root, image=self.start_icon,command =self.start_default_time, borderwidth=0,bg="indianred", activebackground ="indianred", highlightthickness=0, relief='flat')
+        self.default_stop_btn = Button(root,image=self.stop_icon,command =self.pause_default_time,borderwidth=0,bg="indianred",activebackground ="indianred", highlightthickness=0, relief='flat')
+        self.default_reset_btn = Button(root,image=self.reset_icon,command =self.reset_default_time,borderwidth=0,bg="indianred",activebackground ="indianred", highlightthickness=0, relief='flat')
 
     #Study Mode Buttons and Label
-        self.study_timer_lbl = Label(root, text = "45:00", font= ("Times", 100,), fg ="black", bg = "cornflowerblue")
-        self.studycurrent_SB_lbl = Label(root, text="Lets take a Short Break!", font=("Times", 16), fg="black", bg="cornflowerblue")
-        self.studycurrent_LB_lbl = Label(root, text="Lets take a Long Break!", font=("Times", 16), fg="black", bg="cornflowerblue")
+        self.study_timer_lbl = Label(root, text ="45:00", font=("Digital-7", 150,), fg ="black", bg = "cornflowerblue")
 
-        self.study_start_btn = Button(text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.start_study_time)
-        self.study_stop_btn = Button(text = "Stop", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.pause_study_time)
-        self.study_reset_btn = Button(text = "Reset", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.reset_study_time)
+        self.study_start_btn = Button(root, image=self.start_icon,command =self.start_study_time,borderwidth=0,bg="cornflowerblue", activebackground ="cornflowerblue", highlightthickness=0, relief='flat')
+        self.study_stop_btn = Button(root,image=self.stop_icon,command =self.pause_study_time,borderwidth=0,bg="cornflowerblue", activebackground ="cornflowerblue", highlightthickness=0, relief='flat')
+        self.study_reset_btn = Button(root,image=self.reset_icon,command =self.reset_study_time,borderwidth=0,bg="cornflowerblue", activebackground ="cornflowerblue", highlightthickness=0, relief='flat')
     
     #Relax Mode Label and Buttons
-        self.relax_timer_lbl = Label(root, text = "15:00", font= ("Times", 100,), fg ="black", bg = "mediumseagreen")
-        self.relaxcurrent_SB_lbl = Label(root, text="Lets take a Short Break!", font=("Times", 16), fg="black", bg="mediumseagreen")
-        self.relaxcurrent_LB_lbl = Label(root, text="Lets take a Long Break!", font=("Times", 16), fg="black", bg="mediumseagreen")
+        self.relax_timer_lbl = Label(root, text ="15:00", font=("Digital-7", 150,), fg ="black", bg = "mediumseagreen")
 
-        self.relax_start_btn = Button(text = "Start", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.start_relax_time)
-        self.relax_stop_btn = Button(text = "Stop", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.pause_relax_time)
-        self.relax_reset_btn = Button(text = "Reset", font= ("Times", 16), fg = "black", activebackground = "grey",command =self.reset_relax_time)
+        self.relax_start_btn = Button(root, image=self.start_icon,command =self.start_relax_time,borderwidth=0,bg="mediumseagreen", activebackground ="mediumseagreen", highlightthickness=0, relief='flat')
+        self.relax_stop_btn = Button(root,image=self.stop_icon,command =self.pause_relax_time,borderwidth=0,bg="mediumseagreen", activebackground ="mediumseagreen", highlightthickness=0, relief='flat')
+        self.relax_reset_btn = Button(root,image=self.reset_icon,command =self.reset_relax_time,borderwidth=0,bg="mediumseagreen", activebackground ="mediumseagreen", highlightthickness=0, relief='flat')
 
-        self.session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="IndianRed")
-        self.study_session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="cornflowerblue") 
-        self.relax_session_type_lbl = Label(root, text="", font=("Times", 16), fg="black", bg="mediumseagreen") 
+        self.timer_icon = PhotoImage(file="Button Images/timer.png")
+        self.shortbreak_icon = PhotoImage(file="Button Images/short break.png")
+        self.longbreak_icon = PhotoImage(file="Button Images/long break.png")
 
+        self.session_type_img = Label(root, image=self.timer_icon,borderwidth=0,bg="indianred")
+        self.session_type_lbl = Label(root, text="", font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
+
+        self.studysession_type_img = Label(root, image=self.timer_icon,borderwidth=0,bg="cornflowerblue")
+        self.study_session_type_lbl = Label(root, text="", font=("Courier New", 20,"bold"), fg="black", bg="cornflowerblue")
+
+        self.relaxsession_type_img = Label(root, image=self.timer_icon,borderwidth=0,bg="mediumseagreen")
+        self.relax_session_type_lbl = Label(root, text="", font=("Courier New", 20,"bold"), fg="black", bg="mediumseagreen") 
+
+        self.tomato_cycle_icon = PhotoImage(file="Button Images/tomato cycle.png")
+        self.cycles_lbl = Label(root, text="",image=self.tomato_cycle_icon,compound="left", font=("Times", 16), fg="black", bg="IndianRed")
         # Add background music button
-        self.music_btn = Button(root, text="Music ON",font= ("Times", 16), fg = "black", activebackground = "grey", command=self.toggle_music)
+        self.music_on_icon = PhotoImage(file="Button Images/music on.png")
+        self.music_off_icon = PhotoImage(file="Button Images/music off.png")
+        self.music_btn = Button(root,image=self.music_on_icon,command=self.toggle_music,borderwidth=0,bg="indianred", activebackground ="indianred", highlightthickness=0, relief='flat')
         # Background music control
 
         switch_default_mode()
@@ -618,12 +713,12 @@ class MainInterface:
         if self.is_music_playing:
             pygame.mixer.music.stop()
             self.is_music_playing = False
-            self.music_btn.config(text="Music ON")
+            self.music_btn.config(image=self.music_on_icon)
         else:
-            pygame.mixer.music.load("Autumn Garden.mp3")  # Replace with your background music file
+            pygame.mixer.music.load("Sounds/Autumn Garden.mp3")  # Replace with your background music file
             pygame.mixer.music.play(-1)  # Play the music indefinitely
             self.is_music_playing = True
-            self.music_btn.config(text="Music OFF")
+            self.music_btn.config(image=self.music_off_icon)
 
     def complete_pomodoro_session(self, mode, timer_duration, short_break_duration, long_break_duration):
         self.insert_pomodoro_session(mode, 'Timer', timer_duration)
@@ -749,21 +844,20 @@ class MainInterface:
     def update_cycle_count_label(self):
         # Ensure cycle count doesn't go below zero
         self.number_cycles = max(self.number_cycles, 0)
-        self.cycles_lbl.config(text="Cycles: {}".format(self.number_cycles))
+        self.cycles_lbl.config(text=": {}".format(self.number_cycles),font=("Times", 20))
 
     def update_session_type_label(self):
         # Update session type label based on the current session type
         if self.timer_type == "default_timer":
-            session_type = "Timer"
+            self.session_type_img.config(image=self.timer_icon)
+            self.session_type_lbl.config(text="Timer")
         elif self.timer_type == "short_break":
-            session_type = "Short Break"
+            self.session_type_img.config(image=self.shortbreak_icon)
+            self.session_type_lbl.config(text="Short\nBreak")
         elif self.timer_type == "long_break":
-            session_type = "Long Break"
-        else:
-            session_type = ""
-        
-        self.session_type_lbl.config(text=session_type)
-
+            self.session_type_img.config(image=self.longbreak_icon)
+            self.session_type_lbl.config(text="Long\nBreak")
+   
     def alarm_sound(self, timer_type):
         if timer_type == "default_timer":
             self.play_sound(self.timer_end_sound)
@@ -897,15 +991,14 @@ class MainInterface:
     def update_study_session_type_label(self):
         # Update session type label based on the current session type
         if self.study_type == "study_timer":
-            study_session_type = "Timer"
+            self.studysession_type_img.config(image=self.timer_icon)
+            self.study_session_type_lbl.config(text="Timer")
         elif self.study_type == "study_shortbreak":
-            study_session_type = "Short Break"
+            self.studysession_type_img.config(image=self.shortbreak_icon)
+            self.study_session_type_lbl.config(text="Short\nBreak")
         elif self.study_type == "study_longbreak":
-            study_session_type = "Long Break"
-        else:
-            study_session_type = ""
-        
-        self.study_session_type_lbl.config(text=study_session_type)
+            self.studysession_type_img.config(image=self.longbreak_icon)
+            self.study_session_type_lbl.config(text="Long\nBreak")
 
     def alarm_sound2(self,study_type):
         # Stop any currently playing sound
@@ -1024,15 +1117,14 @@ class MainInterface:
     def update_relax_session_type_label(self):
         # Update session type label based on the current session type
         if self.relax_type == "relax_timer":
-            relax_session_type = "Timer"
+            self.relaxsession_type_img.config(image=self.timer_icon)
+            self.relax_session_type_lbl.config(text="Timer")
         elif self.relax_type == "relax_shortbreak":
-            relax_session_type = "Short Break"
+            self.relaxsession_type_img.config(image=self.shortbreak_icon)
+            self.relax_session_type_lbl.config(text="Short\nBreak")
         elif self.relax_type == "relax_longbreak":
-            relax_session_type = "Long Break"
-        else:
-            relax_session_type = ""
-        
-        self.relax_session_type_lbl.config(text=relax_session_type)
+            self.relaxsession_type_img.config(image=self.longbreak_icon)
+            self.relax_session_type_lbl.config(text="Long\nBreak")
 
     def alarm_sound3(self,relax_type):
         # Stop any currently playing sound
@@ -1045,7 +1137,7 @@ class MainInterface:
         elif relax_type == "relax_longbreak":
             self.relax_longbreak_sound.play()
 
-    def insert_pomodoro_session(self, mode, session_type, duration, user='John'):
+    def insert_pomodoro_session(self, mode, session_type, duration, user='Alice'):
         completion_time = datetime.now().isoformat()  # Get the current completion time
 
         # Execute the SQL query to insert the session into the table
