@@ -394,10 +394,11 @@ class StudyListApp(tk.Tk):
 
     def show_notification(self, task):
         notification.notify(
-            title="Task",
+            title="Task Due",
             message=f"The task '{task}' is due now!",
             timeout=10
         )
+        print(f"Notification shown for task '{task}'")
 
 app = StudyListApp()
 # Start the tkinter event loop
