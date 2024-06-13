@@ -1,15 +1,8 @@
 import tkinter as tk
-from tkinter import *
 from tkinter import messagebox
 from tkcalendar import Calendar
 import sqlite3
-import customtkinter
 from datetime import datetime
-
-customtkinter.set_appearance_mode("light")
-customtkinter.set_default_color_theme("dark-blue")
-
-self = customtkinter.CTk()
 
 class ScrollableFrame(tk.Frame):
     def __init__(self, container, *args, **kwargs):
@@ -43,40 +36,33 @@ class StudyListApp(tk.Tk):
         super().__init__()
         self.title("Study List")
         self.geometry("600x600")
-        self.configure(bg="light blue")
+        self.configure(bg="light yellow")
 
-        # Adjustments for calendar_button
-        self.calendar_button = customtkinter.CTkButton(self, text="Calendar", command=self.open_calendar, bg_color=("light blue", "blue"))
-        self.calendar_button.place(x=10, y=10)
+        self.calendar_button = tk.Button(self, text="Calendar", command=self.open_calendar, font=("Times New Roman", 10), width=10, height=1, bg="white")
+        self.calendar_button.place(x=10, y=10)  # Use place() method for absolute positioning  
 
-        # Adjustments for title_label
-        self.title_label = customtkinter.CTkLabel(self, text="Study List", font=("Cooper Black", 50), bg_color="light blue")
+        self.title_label = tk.Label(self, text="Study List", font=("Cooper Black", 50), bg="light yellow")  
         self.title_label.pack(pady=10)
 
-        # Adjustments for entry_frame
-        self.entry_frame = customtkinter.CTkFrame(self, bg_color="light blue")
-        self.entry_frame.pack(padx=20, pady=20, fill=tk.X)
+        self.entry_frame = tk.Frame(self)
+        self.entry_frame.pack(padx=10, pady=10, fill=tk.X)
 
-       # Adjustments for new_task_entry
-        self.new_task_entry = customtkinter.CTkEntry(self.entry_frame, placeholder_text="Add Your Task", height=50, width=200, font=("Times New Roman", 20), corner_radius=50, fg_color=("white", "blue"), bg_color="light blue")  
+        self.new_task_entry = tk.Entry(self.entry_frame, font=("Times New Roman", 20), width=30)  
         self.new_task_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-        # Adjustments for due_date_button
-        self.due_date_button = customtkinter.CTkButton(self.entry_frame, text="Select Due Date", height=50, width=100, command=self.select_due_date, font=("Times New Roman", 15), bg_color="light blue") 
+        self.due_date_button = tk.Button(self.entry_frame, text="Select Due Date", command=self.select_due_date, font=("Times New Roman", 12), width=15, height=2, bg="white")  
         self.due_date_button.pack(side=tk.LEFT, padx=(5,0))
 
-       # Adjustments for due_time_button
-        self.due_time_button = customtkinter.CTkButton(self.entry_frame, text="Select Due Time", command=self.select_time, height=50, width=100, font=("Times New Roman", 15), bg_color="light blue")  
+        self.due_time_button = tk.Button(self.entry_frame, text="Select Due Time", command=self.select_time, font=("Times New Roman", 12), width=15, height=2, bg="white")  
         self.due_time_button.pack(side=tk.LEFT, padx=5)
 
-        # Adjustments for add_button
-        self.add_button = customtkinter.CTkButton(self.entry_frame, text="Add", command=self.add_task, height=50, width=100, font=("Times New Roman", 15), bg_color="light blue")  
+        self.add_button = tk.Button(self.entry_frame, text="Add", command=self.add_task, font=("Times New Roman", 12), width=15, height=2, bg="white")  
         self.add_button.pack(side=tk.LEFT, padx=5)
 
         self.selected_date = None
         self.selected_time = None  # Initialize selected_time variable
 
-        self.scrollable_study_frame = ScrollableFrame(self, bg="light blue")
+        self.scrollable_study_frame = ScrollableFrame(self, bg="light yellow")
         self.scrollable_study_frame.pack(padx=20,pady=10, fill=tk.BOTH, expand=True)
 
         self.study_frame = self.scrollable_study_frame.scrollable_frame
@@ -90,8 +76,7 @@ class StudyListApp(tk.Tk):
         self.task_count_label.pack(anchor="w", padx=20)
 
         # Button to delete all tasks
-        self.delete_all_button = customtkinter.CTkButton(self, text="Delete All Task", command=self.delete_all_tasks, font=("Times New Roman", 10), height=30, width=100, bg_color="light yellow")  
-        self.add_button.pack(side=tk.LEFT, padx=5)
+        self.delete_all_button = tk.Button(self, text="Delete All Task", command=self.delete_all_tasks, font=("Times New Roman", 10), width=15, height=1, bg="white", fg="black")
         self.delete_all_button.pack(pady=1, side=tk.BOTTOM)
 
         self.calendar_tasks = {}  # Dictionary to store tasks associated with each date on the calendar
@@ -101,7 +86,7 @@ class StudyListApp(tk.Tk):
         self.create_table()
         self.load_tasks()
 
-       
+
     def create_table(self):
        with self.conn:
         self.conn.execute("""
@@ -118,9 +103,9 @@ class StudyListApp(tk.Tk):
         cursor = self.conn.cursor()
         cursor.execute("SELECT task, due_date FROM tasks")
         tasks = cursor.fetchall()
-        for task, due_date, due_time in tasks:
-            self.add_task_to_study_list(task, due_date,due_time)
-            self.update_calendar(task, due_date, due_time)  # Add tasks to calendar
+        for task, due_date in tasks:
+            self.add_task_to_study_list(task, due_date)
+            self.update_calendar(task, due_date)  # Add tasks to calendar
 
     def select_due_date(self):
         top = tk.Toplevel(self)
@@ -197,74 +182,65 @@ class StudyListApp(tk.Tk):
            print(f"Error occurred: {e}")
 
     def add_task_to_study_list(self, new_task, due_date, due_time):
-    # Checkbutton for the new task
+       # Checkbutton for the new task
        task_checkbutton = tk.Checkbutton(self.study_frame, text=new_task, font=("Times New Roman", 20), bg="white")
        task_checkbutton.pack(anchor="w", pady=(5, 0))  # Adjust vertical padding
 
        task_checkbutton.var = tk.BooleanVar()
        task_checkbutton.config(variable=task_checkbutton.var, command=lambda: self.mark_completed(task_checkbutton, due_date))
 
-    # Frame to hold the due date and due time labels
-       due_info_frame = tk.Frame(self.study_frame, bg="white")
+       # Frame to hold the due date and due time labels
+       due_info_frame = tk.Frame(self.study_frame, bg="light yellow")
        due_info_frame.pack(anchor="w", padx=20, pady=(0, 5), fill=tk.X)  # Ensure it stretches horizontally
 
-    # Frame to hold both due date and due time labels in the same box
-       due_date_time_frame = tk.Frame(due_info_frame, bd=1, relief=tk.SOLID, bg="white")
+       # Frame to hold both due date and due time labels in the same box
+       due_date_time_frame = tk.Frame(due_info_frame, bd=1, relief=tk.SOLID, bg="light yellow")
        due_date_time_frame.pack(side="left", padx=5)
 
-    # Due date label
-       due_date_label = tk.Label(due_date_time_frame, text=f"Due Date: {due_date}", font=("Times New Roman", 10), bg="white")
+       # Due date label
+       due_date_label = tk.Label(due_date_time_frame, text=f"Due Date: {due_date}", font=("Times New Roman", 10), bg="light yellow")
        due_date_label.pack(padx=5, pady=2)
 
-    # Due time label
-       due_time_label = tk.Label(due_date_time_frame, text=f"Due Time: {due_time}", font=("Times New Roman", 10), bg="white")
+       # Due time label
+       due_time_label = tk.Label(due_date_time_frame, text=f"Due Time: {due_time}", font=("Times New Roman", 10), bg="light yellow")
        due_time_label.pack(padx=5, pady=2)
 
-    # Pack both task widgets (checkbutton, due info frame, and delete button) into a tuple and store in task_widgets list
-       self.task_widgets.append((task_checkbutton, due_info_frame))
+       # Button to delete the task
+       delete_button = tk.Button(self.study_frame, text="❌", command=lambda: self.delete_task(task_checkbutton, due_info_frame, delete_button), bg="light yellow")
+       delete_button.pack(anchor="e", pady=(5, 0))  # Adjust vertical padding
+
+       # Pack both task widgets (checkbutton, due info frame, and delete button) into a tuple and store in task_widgets list
+       self.task_widgets.append((task_checkbutton, due_info_frame, delete_button))
        self.task_count += 1  # Increment task count
        self.update_task_count_label()  # Update task count label
 
-    def mark_completed(self, checkbutton, due_date, due_time):
-     if checkbutton.var.get():
-        # Change text color to gray when task is completed
-        checkbutton.config(fg="gray")
 
-        # Remove the task from the calendar_tasks dictionary
-        task_text = checkbutton.cget("text")
-        for widget_tuple in self.task_widgets:
-            if widget_tuple[0] == checkbutton:
-                due_info_frame = widget_tuple[1]
-                due_time_label = due_info_frame.winfo_children()[1]  # Assuming due time label is the second child
-                due_time = due_time_label.cget("text").replace("Due Time: ", "")
-                break
+    def mark_completed(self, checkbutton, due_date):
+        if checkbutton.var.get():
+            checkbutton.config(fg="gray")  # Change text color to gray when task is completed
+            self.task_count -= 1  # Decrement task count
+            
+            # Remove the task from the calendar_tasks dictionary
+            task_text = checkbutton.cget("text")
+            if due_date in self.calendar_tasks and task_text in self.calendar_tasks[due_date]:
+                self.calendar_tasks[due_date].remove(task_text)
+                if not self.calendar_tasks[due_date]:
+                    del self.calendar_tasks[due_date]
+            
+            # Update the calendar frame
+            self.update_calendar_frame()
+            
+            # Remove task from database
+            self.delete_task_from_db(task_text, due_date)
+            
+            # Remove task from the study list
+            self.delete_task(checkbutton, None, None)
+            
+        else:
+            checkbutton.config(fg="black")  # Change text color back to black when task is incomplete
+            self.task_count += 1  # Increment task count
+            self.update_task_count_label()  # Update task count label
 
-        if due_date in self.calendar_tasks and (task_text, due_time) in self.calendar_tasks[due_date]:
-            self.calendar_tasks[due_date].remove((task_text, due_time))
-            if not self.calendar_tasks[due_date]:
-                del self.calendar_tasks[due_date]
-
-        # Update the calendar frame
-        self.update_calendar_frame()
-
-        # Disable the checkbutton to prevent unchecking
-        checkbutton.config(state="disabled")
-        
-        # Decrement task count only if it's not already completed
-        if checkbutton["fg"] != "gray":
-            self.task_count -= 1
-            self.update_task_count_label()
-
-        # Remove task from database
-        self.delete_task_from_db(task_text, due_date, due_time)
-        
-     else:
-        # Handle the case where the user attempts to uncheck a completed task
-        # For example, show a message to the user that the task is already completed
-        messagebox.showinfo("Task Completed", "This task has already been completed and cannot be unchecked.")
-
-
-    
     def delete_task(self, task_checkbutton, due_date_frame, delete_button):
         # Extract task text and due date before destroying the widgets
         task_text = task_checkbutton.cget("text")
@@ -332,12 +308,12 @@ class StudyListApp(tk.Tk):
     def update_task_count_label(self):
         self.task_count_label.config(text=f"Number of tasks: {self.task_count}")
 
-    def update_calendar(self, task, due_date ,due_time):
+    def update_calendar(self, task, due_date):
         # Add the task to the dictionary of calendar tasks
         if due_date not in self.calendar_tasks:
             self.calendar_tasks[due_date] = []
-        self.calendar_tasks[due_date].append((task, due_time))  #Store task along with due time as a tuple
-        print(f"Added task '{task}' with due time '{due_time}' to date {due_date}. Current tasks for this date: {self.calendar_tasks[due_date]}")  #Debug print
+        self.calendar_tasks[due_date].append(task)
+        print(f"Added task '{task}' to date {due_date}. Current tasks for this date: {self.calendar_tasks[due_date]}")  # Debug print
 
     def open_calendar(self):
         # Close previous calendar window if exists
@@ -415,5 +391,4 @@ class StudyListApp(tk.Tk):
                 task_label.grid(row=i, column=0, sticky="w", padx=10, pady=5)
 
 app = StudyListApp()
-# Start the tkinter event loop
 app.mainloop()
