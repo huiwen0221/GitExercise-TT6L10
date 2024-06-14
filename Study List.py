@@ -5,11 +5,13 @@ from tkcalendar import Calendar
 import sqlite3
 import customtkinter
 from datetime import datetime
+from plyer import notification
+import threading
+
+self = customtkinter.CTk()
 
 customtkinter.set_appearance_mode("light")
 customtkinter.set_default_color_theme("dark-blue")
-
-self = customtkinter.CTk()
 
 class ScrollableFrame(tk.Frame):
     def __init__(self, container, *args, **kwargs):
@@ -58,7 +60,7 @@ class StudyListApp(tk.Tk):
         self.entry_frame.pack(padx=20, pady=20, fill=tk.X)
 
        # Adjustments for new_task_entry
-        self.new_task_entry = customtkinter.CTkEntry(self.entry_frame, placeholder_text="Add Your Task", height=50, width=200, font=("Times New Roman", 20), corner_radius=50, fg_color=("white", "blue"), bg_color="light blue")  
+        self.new_task_entry = customtkinter.CTkEntry(self.entry_frame, placeholder_text="Enter Your Task", height=50, width=200, font=("Times New Roman", 20), corner_radius=50, fg_color=("white", "blue"), bg_color="light blue")  
         self.new_task_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         # Adjustments for due_date_button
@@ -100,26 +102,28 @@ class StudyListApp(tk.Tk):
         self.conn = sqlite3.connect("tasks.db")
         self.create_table()
         self.load_tasks()
+    
 
        
     def create_table(self):
        with self.conn:
+        self.conn.execute("DROP TABLE IF EXISTS tasks;" )
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task TEXT NOT NULL,
                 due_date TEXT NOT NULL,
-                due_time TEXT  -- Add this line for due_time column
+                due_time TEXT NOT NULL
             )
         """)
 
 
     def load_tasks(self):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT task, due_date FROM tasks")
+        cursor.execute("SELECT task, due_date ,due_time FROM tasks")
         tasks = cursor.fetchall()
         for task, due_date, due_time in tasks:
-            self.add_task_to_study_list(task, due_date,due_time)
+            self.add_task_to_study_list(task, due_date, due_time)
             self.update_calendar(task, due_date, due_time)  # Add tasks to calendar
 
     def select_due_date(self):
@@ -187,14 +191,9 @@ class StudyListApp(tk.Tk):
 
 
     def save_task(self, task, due_date, due_time):
-        try:
-          with self.conn:
-            print(f"Saving task: {task}, Due Date: {due_date}, Due Time: {due_time}")
+        with self.conn:
             self.conn.execute("INSERT INTO tasks (task, due_date, due_time) VALUES (?, ?, ?)", (task, due_date, due_time))
-            self.conn.commit()  # Commit the transaction to save changes
-            print("Task saved successfully.")
-        except sqlite3.Error as e:
-           print(f"Error occurred: {e}")
+            self.conn.commit()
 
     def add_task_to_study_list(self, new_task, due_date, due_time):
     # Checkbutton for the new task
@@ -205,129 +204,99 @@ class StudyListApp(tk.Tk):
        task_checkbutton.config(variable=task_checkbutton.var, command=lambda: self.mark_completed(task_checkbutton, due_date))
 
     # Frame to hold the due date and due time labels
-       due_info_frame = tk.Frame(self.study_frame, bg="white")
+       due_info_frame = tk.Frame(self.study_frame, bg="light yellow")
        due_info_frame.pack(anchor="w", padx=20, pady=(0, 5), fill=tk.X)  # Ensure it stretches horizontally
 
     # Frame to hold both due date and due time labels in the same box
-       due_date_time_frame = tk.Frame(due_info_frame, bd=1, relief=tk.SOLID, bg="white")
+       due_date_time_frame = tk.Frame(due_info_frame, bd=1, relief=tk.SOLID, bg="light yellow")
        due_date_time_frame.pack(side="left", padx=5)
 
     # Due date label
-       due_date_label = tk.Label(due_date_time_frame, text=f"Due Date: {due_date}", font=("Times New Roman", 10), bg="white")
+       due_date_label = tk.Label(due_date_time_frame, text=f"Due Date: {due_date}", font=("Times New Roman", 10), bg="light yellow")
        due_date_label.pack(padx=5, pady=2)
 
     # Due time label
-       due_time_label = tk.Label(due_date_time_frame, text=f"Due Time: {due_time}", font=("Times New Roman", 10), bg="white")
+       due_time_label = tk.Label(due_date_time_frame, text=f"Due Time: {due_time}", font=("Times New Roman", 10), bg="light yellow")
        due_time_label.pack(padx=5, pady=2)
 
+    # Button to delete the task
+       delete_button = tk.Button(self.study_frame, text="❌", command=lambda: self.delete_task(task_checkbutton, due_info_frame, delete_button), bg="light yellow")
+       delete_button.pack(anchor="e", pady=(5, 0))  # Adjust vertical padding
+
     # Pack both task widgets (checkbutton, due info frame, and delete button) into a tuple and store in task_widgets list
-       self.task_widgets.append((task_checkbutton, due_info_frame))
+       self.task_widgets.append((task_checkbutton, due_info_frame, delete_button, new_task, due_date, due_time))
        self.task_count += 1  # Increment task count
        self.update_task_count_label()  # Update task count label
 
+       self.schedule_notification(new_task, due_date, due_time)
+
     def mark_completed(self, checkbutton, due_date, due_time):
-     if checkbutton.var.get():
-        # Change text color to gray when task is completed
-        checkbutton.config(fg="gray")
+        if checkbutton.var.get():
+            checkbutton.config(fg="gray")  # Change text color to gray when task is completed
+            self.task_count -= 1  # Decrement task count
+            
+            # Remove the task from the calendar_tasks dictionary
+            task_text = checkbutton.cget("text")
+            if due_date in self.calendar_tasks and task_text in self.calendar_tasks[due_date,due_time]:
+                self.calendar_tasks[due_date,due_time].remove(task_text)
+                if not self.calendar_tasks[due_date,due_time]:
+                    del self.calendar_tasks[due_date,due_time]
+            
+            # Update the calendar frame
+            self.update_calendar_frame()
+            
+            # Remove task from database
+            self.delete_task_from_db(task_text, due_date,due_time)
+            
+            # Remove task from the study list
+            self.delete_task(checkbutton, None, None)
+            
+        else:
+            checkbutton.config(fg="black")  # Change text color back to black when task is incomplete
+            self.task_count += 1  # Increment task count
+            self.update_task_count_label()  # Update task count label
 
-        # Remove the task from the calendar_tasks dictionary
-        task_text = checkbutton.cget("text")
-        for widget_tuple in self.task_widgets:
-            if widget_tuple[0] == checkbutton:
-                due_info_frame = widget_tuple[1]
-                due_time_label = due_info_frame.winfo_children()[1]  # Assuming due time label is the second child
-                due_time = due_time_label.cget("text").replace("Due Time: ", "")
-                break
+    def delete_task(self, task_checkbutton, due_info_frame, delete_button):
+        # Extract stored task text, due date, and due time
+        task_info = next((task_info for task_cb, due_date_time_frame, delete_button, *task_info in self.task_widgets if task_cb == task_checkbutton), None)
 
-        if due_date in self.calendar_tasks and (task_text, due_time) in self.calendar_tasks[due_date]:
-            self.calendar_tasks[due_date].remove((task_text, due_time))
-            if not self.calendar_tasks[due_date]:
-                del self.calendar_tasks[due_date]
+        if task_info:
+            task_text, due_date, due_time = task_info
 
-        # Update the calendar frame
-        self.update_calendar_frame()
+            print(f"Deleting task: '{task_text}', due date: '{due_date}', due time: '{due_time}'")  # Debug print
 
-        # Disable the checkbutton to prevent unchecking
-        checkbutton.config(state="disabled")
-        
-        # Decrement task count only if it's not already completed
-        if checkbutton["fg"] != "gray":
-            self.task_count -= 1
-            self.update_task_count_label()
+            task_checkbutton.destroy()  # Destroy the checkbutton
+            due_info_frame.destroy()  # Destroy the due date frame
+            delete_button.destroy()  # Destroy the delete button
 
-        # Remove task from database
-        self.delete_task_from_db(task_text, due_date, due_time)
-        
-     else:
-        # Handle the case where the user attempts to uncheck a completed task
-        # For example, show a message to the user that the task is already completed
-        messagebox.showinfo("Task Completed", "This task has already been completed and cannot be unchecked.")
+            self.task_widgets = [(task_cb, due_frame, del_btn, *task_info) for task_cb, due_frame, del_btn, *task_info in self.task_widgets if task_cb != task_checkbutton]
+            self.task_count -= 1  # Decrement task count
+            self.update_task_count_label()  # Update task count label
 
+            # Remove task from database
+            self.delete_task_from_db(task_text, due_date, due_time)
 
-    
-    def delete_task(self, task_checkbutton, due_date_frame, delete_button):
-        # Extract task text and due date before destroying the widgets
-        task_text = task_checkbutton.cget("text")
-        due_date_text = due_date_frame.winfo_children()[0].cget("text").replace("Due: ", "") if due_date_frame else None
-        
-        # Destroy the widgets
-        task_checkbutton.destroy()
-        if due_date_frame:
-            due_date_frame.destroy()
-        if delete_button:
-            delete_button.destroy()
-
-        # Remove task from the task_widgets list
-        for widget_tuple in self.task_widgets:
-            if widget_tuple[0] == task_checkbutton:
-                self.task_widgets.remove(widget_tuple)
-                break
-        self.task_count -= 1
-        self.update_task_count_label()
-
-        if task_text and due_date_text:
-            self.delete_task_from_db(task_text,due_date_text)
-
-        # Debug prints to check values
-        print(f"Deleting task '{task_text}' with due date '{due_date_text}' from database.")
-
-        # Remove task from the calendar_tasks dictionary
-        if due_date_text in self.calendar_tasks:
-            if task_text in self.calendar_tasks[due_date_text]:
-                self.calendar_tasks[due_date_text].remove(task_text)
-                if not self.calendar_tasks[due_date_text]:
-                    del self.calendar_tasks[due_date_text]  # Remove the key if no tasks left for that date
-
-        # Update the calendar frame if it's open
-        self.update_calendar_frame()
-
-    def delete_task_from_db(self, task, due_date):
+    def delete_task_from_db(self, task, due_date, due_time):
         with self.conn:
-            self.conn.execute("DELETE FROM tasks WHERE task = ? AND due_date = ?", (task, due_date))
-            # Ensure changes are committed
-            self.conn.commit()
-        # Debug print to confirm deletion
-        print(f"Deleted task '{task}' with due date '{due_date}' from database.")
+            print(f"Executing DELETE FROM tasks WHERE task = '{task}' AND due_date = '{due_date}' AND due_time = '{due_time}'")  # Debug print
+            self.conn.execute("DELETE FROM tasks WHERE task = ? AND due_date = ? AND due_time = ?", (task, due_date, due_time))
+            self.conn.commit()  # Ensure the deletion is committed
 
     def delete_all_tasks(self):
-        for widget_tuple in self.task_widgets:
-            widget_tuple[0].destroy()  # Destroy the checkbutton
-            widget_tuple[1].destroy()  # Destroy the due date frame
-            widget_tuple[2].destroy()  # Destroy the delete button
-        self.task_widgets = []  # Clear the list of task widgets
-        self.task_count = 0
-        self.update_task_count_label()
+            for widget_tuple in self.task_widgets:
+                widget_tuple[0].destroy()  # Destroy the checkbutton
+                widget_tuple[1].destroy()  # Destroy the due date frame
+                widget_tuple[2].destroy()  # Destroy the delete button
+            self.task_widgets = []  # Clear the list of task widgets
+            self.task_count = 0
+            self.update_task_count_label()
 
-        # Remove all tasks from calendar_tasks dictionary
-        self.calendar_tasks.clear()
-
-        # Remove all tasks from database
-        with self.conn:
-            self.conn.execute("DELETE FROM tasks")
-            self.conn.commit()
+            # Remove all tasks from database
+            with self.conn:
+                self.conn.execute("DELETE FROM tasks")
 
         # Update the calendar frame if it's open
-        self.update_calendar_frame()
+            self.update_calendar_frame()
 
     def update_task_count_label(self):
         self.task_count_label.config(text=f"Number of tasks: {self.task_count}")
@@ -367,7 +336,7 @@ class StudyListApp(tk.Tk):
         # Update the calendar frame to reflect current tasks
         self.update_calendar_frame()
 
-    def display_calendar_tasks(self, event, calendar, calendar_window):
+    def display_calendar_tasks(self, calendar):
         # Get the selected date from the calendar
         selected_date = datetime.strptime(calendar.get_date(), "%m/%d/%y").strftime("%Y-%m-%d")
 
@@ -414,6 +383,23 @@ class StudyListApp(tk.Tk):
                 task_label = tk.Label(self.task_frame, text=task, font=("Arial", 12), bg="light yellow")
                 task_label.grid(row=i, column=0, sticky="w", padx=10, pady=5)
 
+
+    def schedule_notification(self, task, due_date, due_time):
+        due_datetime_str = f"{due_date} {due_time}"
+        due_datetime = datetime.strptime(due_datetime_str, "%Y-%m-%d %H:%M")
+        delay = (due_datetime - datetime.now()).total_seconds()
+        
+        if delay > 0:
+            threading.Timer(delay, self.show_notification, args=(task,)).start()
+            print(f"Scheduled notification for task '{task}' at {due_datetime_str}")
+
+    def show_notification(self, task):
+        notification.notify(
+            title="Task Due",
+            message=f"The task '{task}' is due now!",
+            timeout=10
+        )
+        print(f"Notification shown for task '{task}'")
+
 app = StudyListApp()
-# Start the tkinter event loop
 app.mainloop()
