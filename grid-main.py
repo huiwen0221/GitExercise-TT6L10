@@ -12,8 +12,11 @@ from plyer import notification
 import threading
 import os
 
+
 script_dir = os.path.dirname(__file__)
+# Relative path to the image folder
 image_folder_path = os.path.join(script_dir, "Button Images")
+# Relative path to the sounds folder
 sounds_folder_path = os.path.join(script_dir, "Sounds")
 
 #OS Sound Folder
@@ -1215,7 +1218,6 @@ class MainInterface:
 
                 # Update the display with the new timer type and remaining time
                 self.update_relax_display()
-
 
     def update_relax_display(self):
         minutes = int(self.relax_remaining_time // 60)
