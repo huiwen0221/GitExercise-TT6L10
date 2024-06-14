@@ -12,8 +12,6 @@ from plyer import notification
 import threading
 
 
-
-
 class MainInterface:
     def __init__(self,root):
         self.root = root
