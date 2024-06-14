@@ -14,6 +14,15 @@ import os
 
 script_dir = os.path.dirname(__file__)
 image_folder_path = os.path.join(script_dir, "Button Images")
+sounds_folder_path = os.path.join(script_dir, "Sounds")
+
+#OS Sound Folder
+def get_sound_path(filename):
+            return os.path.join(sounds_folder_path, filename)
+
+# Function to get the full path of the image files
+def get_image_path(filename):
+    return os.path.join(image_folder_path, filename)
 
 class MainInterface:
     def __init__(self,root):
@@ -22,9 +31,17 @@ class MainInterface:
         self.root.geometry("1000x700")
         self.root.configure(bg = "IndianRed")
 
+        script_dir = os.path.dirname(__file__)
+        image_folder_path = os.path.join(script_dir, "Button Images")
+        sounds_folder_path = os.path.join(script_dir, "Sounds")
+
+
         # Function to get the full path of the image files
         def get_image_path(filename):
             return os.path.join(image_folder_path, filename)
+        
+        def get_sound_path(filename):
+            return os.path.join(sounds_folder_path, filename)
     
         self.window_icon = PhotoImage(file=get_image_path("pomodoro helper.png"))
         self.root.iconphoto(False,self.window_icon)
@@ -66,15 +83,15 @@ class MainInterface:
         );""")
 
         self.sound_files = {
-            "Default Alarm": "Sounds/Default Timer Alarm.wav",
-            "Referee Whistle": "Sounds/Study Referee Alarm.wav",
-            "Chime": "Sounds/Relax Chime Alarm.wav",
-            "Default Short Break": "Sounds/Default SB.wav",
-            "Churchbell": "Sounds/Study Churchbell SB.wav",
-            "Wind Chimes": "Sounds/Relax WindChimes SB.wav",
-            "Default Microwave": "Sounds/Default Microwave LB.wav",
-            "Great Harp": "Sounds/Study Great Harp LB.wav",
-            "Relaxing Harp": "Sounds/Relax Harp LB.wav"
+            "Default Alarm": get_sound_path("Default Timer Alarm.wav"),
+            "Referee Whistle": get_sound_path("Study Referee Alarm.wav"),
+            "Chime": get_sound_path("Relax Chime Alarm.wav"),
+            "Default Short Break": get_sound_path("Default SB.wav"),
+            "Churchbell": get_sound_path("Study Churchbell SB.wav"),
+            "Wind Chimes": get_sound_path("Relax WindChimes SB.wav"),
+            "Default Microwave": get_sound_path("Default Microwave LB.wav"),
+            "Great Harp": get_sound_path("Study Great Harp LB.wav"),
+            "Relaxing Harp": get_sound_path("Relax Harp LB.wav")
         }
 
         self.timer_end_sound = self.sound_files["Default Alarm"]
@@ -774,9 +791,9 @@ class MainInterface:
 
         self.timer_type = "default_timer"
 
-        self.default_timer_sound = "Sounds/Default Timer Alarm.wav"
-        self.default_short_break_sound = "Sounds/Default SB.wav"
-        self.default_long_break_sound = "Sounds/Default Microwave LB.wav"
+        self.default_timer_sound = get_sound_path("Default Timer Alarm.wav")
+        self.default_short_break_sound = get_sound_path("Default SB.wav")
+        self.default_long_break_sound = get_sound_path("Default Microwave LB.wav")
 
         self.number_cycles = 0  # Initialize number of cycles to zero
         self.current_cycle = 0  #Current cycles is zero
@@ -789,7 +806,7 @@ class MainInterface:
             self.is_music_playing = False
             self.music_btn.config(image=self.music_on_icon)
         else:
-            pygame.mixer.music.load("Sounds/Autumn Garden.mp3")  # Replace with your background music file
+            pygame.mixer.music.load(get_sound_path("Autumn Garden.mp3"))  # Replace with your background music file
             pygame.mixer.music.play(-1)  # Play the music indefinitely
             self.is_music_playing = True
             self.music_btn.config(image=self.music_off_icon)
@@ -960,7 +977,7 @@ class MainInterface:
                 self.achievement_unlocked(badge_path)
 
     def achievement_unlocked(self, badge_path):
-        pygame.mixer.Sound("Sounds/Default Microwave LB.wav").play()
+        pygame.mixer.Sound(get_sound_path("Default Microwave LB.wav")).play()
         messagebox.showinfo("Achievement Unlocked!", "You've earned a new badge!")
         self.display_badge(badge_path)
 
@@ -991,9 +1008,9 @@ class MainInterface:
         self.study_cycle_count = 0
 
         #Load sounds
-        self.study_timer_sound = pygame.mixer.Sound("Sounds/Study Referee Alarm.wav")
-        self.study_shortbreak_sound = pygame.mixer.Sound("Sounds/Study Churchbell SB.wav")
-        self.study_longbreak_sound = pygame.mixer.Sound("Sounds/Study Great Harp LB.wav")
+        self.study_timer_sound = pygame.mixer.Sound(get_sound_path("Study Referee Alarm.wav"))
+        self.study_shortbreak_sound = pygame.mixer.Sound(get_sound_path("Study Churchbell SB.wav"))
+        self.study_longbreak_sound = pygame.mixer.Sound(get_sound_path("Study Great Harp LB.wav"))
 
 
 ##STUDY MODE
@@ -1119,9 +1136,9 @@ class MainInterface:
         self.relax_cycle_count = 0
 
         #Load sounds
-        self.relax_timer_sound = pygame.mixer.Sound("Sounds/Relax Chime Alarm.wav")
-        self.relax_shortbreak_sound = pygame.mixer.Sound("Sounds/Relax WindChimes SB.wav")
-        self.relax_longbreak_sound = pygame.mixer.Sound("Sounds/Relax Harp LB.wav")
+        self.relax_timer_sound = pygame.mixer.Sound(get_sound_path("Relax Chime Alarm.wav"))
+        self.relax_shortbreak_sound = pygame.mixer.Sound(get_sound_path("Relax WindChimes SB.wav"))
+        self.relax_longbreak_sound = pygame.mixer.Sound(get_sound_path("Relax Harp LB.wav"))
 
 ##RELAX
     def relaxmode_timer(self): #15 mins
