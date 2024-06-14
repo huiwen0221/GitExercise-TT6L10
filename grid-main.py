@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from plyer import notification
 import threading
+import os
 
+script_dir = os.path.dirname(__file__)
+image_folder_path = os.path.join(script_dir, "Button Images")
 
 class MainInterface:
     def __init__(self,root):
@@ -19,7 +22,11 @@ class MainInterface:
         self.root.geometry("1000x700")
         self.root.configure(bg = "IndianRed")
 
-        self.window_icon = PhotoImage(file="Button Images/pomodoro helper.png")
+        # Function to get the full path of the image files
+        def get_image_path(filename):
+            return os.path.join(image_folder_path, filename)
+    
+        self.window_icon = PhotoImage(file=get_image_path("pomodoro helper.png"))
         self.root.iconphoto(False,self.window_icon)
 
         pygame.init()
@@ -487,14 +494,14 @@ class MainInterface:
                 settings_window.geometry("500x500")
                 settings_window.configure(bg ="gray")
 
-                self.settingswindow_icon = PhotoImage(file="Button Images/user setting1.png")
+                self.settingswindow_icon = PhotoImage(file=get_image_path("user setting1.png"))
                 settings_window.iconphoto(False,self.settingswindow_icon)       
 
                 settings_window.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
                 settings_window.rowconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform='a')
 
     #TIMER DURATION ENTRYBOX
-                self.timersetting_icon = PhotoImage(file="Button Images/timer.png")
+                self.timersetting_icon = PhotoImage(file=get_image_path("timer.png"))
                 self.timersetting_img_lbl = Label(settings_window, image=self.timersetting_icon,bg="gray")
                 self.timersetting_img_lbl.grid(row = 0, column=0,sticky="w")
                 self.timer_entry_lbl= Label(settings_window, text="Timer Duration:", font=("Arial",18), bg="gray", fg="black")
@@ -509,7 +516,7 @@ class MainInterface:
                 self.timerseconds_entry.insert(0,"00")
 
     #SHORT BREAK DURATION ENTRYBOX
-                self.shortbreaksetting_icon = PhotoImage(file="Button Images/short break.png")
+                self.shortbreaksetting_icon = PhotoImage(file=get_image_path("short break.png"))
                 self.shortbreaksetting_img_lbl = Label(settings_window, image=self.shortbreaksetting_icon,bg="gray")
                 self.shortbreaksetting_img_lbl.grid(row = 1, column=0,sticky="w")
                 self.shortbreak_entry_lbl= Label(settings_window, text="Short Break Duration:", font=("Arial",18), bg="gray", fg="black")
@@ -524,7 +531,7 @@ class MainInterface:
                 self.shortbreakseconds_entry.insert(0, "00")
 
     #LONG BREAK DURATION ENTRYBOX
-                self.longbreaksetting_icon = PhotoImage(file="Button Images/long break.png")
+                self.longbreaksetting_icon = PhotoImage(file=get_image_path("long break.png"))
                 self.longbreaksetting_img_lbl = Label(settings_window, image=self.longbreaksetting_icon,bg="gray")
                 self.longbreaksetting_img_lbl.grid(row =2, column=0,sticky="w")
                 self.longbreak_entry_lbl= Label(settings_window, text="Long Break Duration:", font=("Arial",18), bg="gray", fg="black")
@@ -539,7 +546,7 @@ class MainInterface:
                 self.longbreakseconds_entry.insert(0, "00")
 
     #REPEAT CYCLES ENTRYBOX
-                self.repeat_cycles_icon = PhotoImage(file="Button Images/tomato cycle.png")
+                self.repeat_cycles_icon = PhotoImage(file=get_image_path("tomato cycle.png"))
                 self.repeat_cycles_img_lbl = Label(settings_window, image=self.repeat_cycles_icon,bg="gray")
                 self.repeat_cycles_img_lbl.grid(row =3, column=0,sticky="w")
                 self.repeat_cycles_lbl= Label(settings_window, text="Times to Repeat:", font=("Arial",18), bg="gray", fg="black")
@@ -549,12 +556,12 @@ class MainInterface:
                 self.repeat_cycles_entry.grid(row = 3, column=3, columnspan=1,sticky="w")
 
     #RESET PRESETS
-                self.reset_all_icon = PhotoImage(file="Button Images/reset all.png")
+                self.reset_all_icon = PhotoImage(file=get_image_path("reset all.png"))
                 self.reset_all_btn=Button(settings_window,text="Reset ALL Presets",font=("Arial",13),compound="top", image=self.reset_all_icon, command=reset_default_mode,borderwidth=0,bg="gray", activebackground ="gray", highlightthickness=0)
                 self.reset_all_btn.grid(row=8,column=8,columnspan=2,rowspan=2,sticky="se")
 
     #ENDING SOUNDS COMBOBOX
-                self.sounds_icon = PhotoImage(file="Button Images/sounds setting.png")
+                self.sounds_icon = PhotoImage(file=get_image_path("sounds setting.png"))
                 self.sounds_img_lbl = Label(settings_window, image=self.sounds_icon,bg="gray")
                 self.sounds_img_lbl.grid(row =4, column=0,sticky="w")
                 self.sounds_entry_lbl= Label(settings_window, text="Ending Sounds:", font=("Arial",18), bg="gray", fg="black")
@@ -585,7 +592,7 @@ class MainInterface:
                 self.selected_LB_sound = "Default Microwave LB"
 
     #BACKGROUND COLOR
-                self.backgroundcolor_icon = PhotoImage(file="Button Images/bg color.png")
+                self.backgroundcolor_icon = PhotoImage(file=get_image_path("bg color.png"))
                 self.backgroundcolor_img_lbl = Label(settings_window, image=self.backgroundcolor_icon,bg="gray")
                 self.backgroundcolor_img_lbl.grid(row =5, column=0,sticky="w")
                 self.bg_color_lbl = Label(settings_window, text="Background Color:", font=("Arial",18), bg="gray", fg="black")
@@ -595,7 +602,7 @@ class MainInterface:
                 self.bg_color_btn.grid(row=5, column=3, columnspan=2, sticky="w")
 
     #VOLUME SLIDER
-                self.volume_icon = PhotoImage(file="Button Images/volume.png")
+                self.volume_icon = PhotoImage(file=get_image_path("volume.png"))
                 self.volume_img_lbl = Label(settings_window, image=self.volume_icon,bg="gray")
                 self.volume_img_lbl.grid(row =6, column=0,sticky="w")
                 volume_label = Label(settings_window, text="Sound Volume:", font=("Arial", 18), bg="gray", fg="black")
@@ -610,55 +617,55 @@ class MainInterface:
                 self.volume_label.grid(row=6, column=5, columnspan=2, sticky="w")
 
     #PRESET 1 (SAVE AND LOAD)
-                self.preset1_icon = PhotoImage(file="Button Images/preset 1.png")
+                self.preset1_icon = PhotoImage(file=get_image_path("preset 1.png"))
                 self.preset1_img_lbl = Label(settings_window, image=self.preset1_icon,bg="gray")
                 self.preset1_img_lbl.grid(row=7,column=0,sticky="w")
 
                 self.preset1_label = Label(settings_window, text="Preset 1:", font=("Arial", 18), bg="gray", fg="black")
                 self.preset1_label.grid(row=7, column=1, columnspan=2, sticky="w")
 
-                self.save_preset1_icon = PhotoImage(file="Button Images/save preset1.png")
+                self.save_preset1_icon = PhotoImage(file=get_image_path("save preset1.png"))
 
                 self.save_preset1_btn=Button(settings_window, image=self.save_preset1_icon,bg="gray",command=save_preset1_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.save_preset1_btn.grid(row=7,column=3,columnspan=1,sticky="w")
 
-                self.load_preset1_icon = PhotoImage(file="Button Images/load preset1.png")
+                self.load_preset1_icon = PhotoImage(file=get_image_path("load preset1.png"))
 
                 self.load_preset1_btn=Button(settings_window, image=self.load_preset1_icon,bg="gray",command=load_preset1_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.load_preset1_btn.grid(row=7,column=4,columnspan=1,sticky="w")
 
     #PRESET 2 (SAVE AND LOAD)
-                self.preset2_icon = PhotoImage(file="Button Images/preset 2.png")
+                self.preset2_icon = PhotoImage(file=get_image_path("preset 2.png"))
                 self.preset2_img_lbl = Label(settings_window, image=self.preset2_icon,bg="gray")
                 self.preset2_img_lbl.grid(row=8,column=0,sticky="w")
 
                 self.preset2_label = Label(settings_window, text="Preset 2:", font=("Arial", 18), bg="gray", fg="black")
                 self.preset2_label.grid(row=8, column=1, columnspan=2, sticky="w")
 
-                self.save_preset2_icon = PhotoImage(file="Button Images/save preset2.png")
+                self.save_preset2_icon = PhotoImage(file=get_image_path("save preset2.png"))
 
                 self.save_preset2_btn=Button(settings_window, image=self.save_preset2_icon,bg="gray",command=save_preset2_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.save_preset2_btn.grid(row=8,column=3,columnspan=1,sticky="w")
 
-                self.load_preset2_icon = PhotoImage(file="Button Images/load preset2.png")
+                self.load_preset2_icon = PhotoImage(file=get_image_path("load preset2.png"))
 
                 self.load_preset2_btn=Button(settings_window, image=self.load_preset2_icon,bg="gray",command=load_preset2_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.load_preset2_btn.grid(row=8,column=4,columnspan=1,sticky="w")
 
     #PRESET 3 (SAVE AND LOAD)
-                self.preset3_icon = PhotoImage(file="Button Images/preset 3.png")
+                self.preset3_icon = PhotoImage(file=get_image_path("preset 3.png"))
                 self.preset3_img_lbl = Label(settings_window, image=self.preset3_icon,bg="gray")
                 self.preset3_img_lbl.grid(row=9,column=0,sticky="w")
 
                 self.preset3_label = Label(settings_window, text="Preset 3:", font=("Arial", 18), bg="gray", fg="black")
                 self.preset3_label.grid(row=9, column=1, columnspan=2, sticky="w")
 
-                self.save_preset3_icon = PhotoImage(file="Button Images/save preset3.png")
+                self.save_preset3_icon = PhotoImage(file=get_image_path("save preset3.png"))
 
                 self.save_preset3_btn=Button(settings_window, image=self.save_preset3_icon,bg="gray",command=save_preset3_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.save_preset3_btn.grid(row=9,column=3,columnspan=1,sticky="w")
 
-                self.load_preset3_icon = PhotoImage(file="Button Images/load preset3.png")
+                self.load_preset3_icon = PhotoImage(file=get_image_path("load preset3.png"))
 
                 self.load_preset3_btn=Button(settings_window, image=self.load_preset3_icon,bg="gray",command=load_preset3_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.load_preset3_btn.grid(row=9,column=4,columnspan=1,sticky="w")
@@ -675,41 +682,41 @@ class MainInterface:
      #User Menu (Statistics, Achievements,Study List)
         user_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="User", menu=user_menu)
-        self.statistics_icon=PhotoImage(file="Button Images/statistics.png")
+        self.statistics_icon=PhotoImage(file=get_image_path("statistics.png"))
         user_menu.add_command(label="Statistics",image=self.statistics_icon,compound="left", command=user_data)
-        self.achievements_icon=PhotoImage(file="Button Images/achievements.png")
+        self.achievements_icon=PhotoImage(file=get_image_path("achievements.png"))
         user_menu.add_command(label="Achievements",image=self.achievements_icon,compound="left", command=badges_user)
         user_menu.add_separator()
-        self.studylist_icon=PhotoImage(file="Button Images/studylist.png")
+        self.studylist_icon=PhotoImage(file=get_image_path("studylist.png"))
         user_menu.add_command(label="Study List",image=self.studylist_icon,compound="left", command=studylist_user)
 
     #Mode Menu (Default, Study, Relax)
         mode_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Mode", menu=mode_menu)
-        self.default_icon=PhotoImage(file="Button Images/defaultmode.png")
+        self.default_icon=PhotoImage(file=get_image_path("defaultmode.png"))
         mode_menu.add_command(label="Default Mode",image=self.default_icon,compound="left", command=switch_default_mode)
         mode_menu.add_separator()
-        self.study_icon=PhotoImage(file="Button Images/studymode.png")
+        self.study_icon=PhotoImage(file=get_image_path("studymode.png"))
         mode_menu.add_command(label="Study Mode",image=self.study_icon,compound="left", command=study_mode)
         mode_menu.add_separator()
-        self.relax_icon=PhotoImage(file="Button Images/relaxmode.png")
+        self.relax_icon=PhotoImage(file=get_image_path("relaxmode.png"))
         mode_menu.add_command(label="Relax Mode",image=self.relax_icon,compound="left", command=relax_mode)
 
     #Settings Open(Open new settings window)
         setting_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Settings",menu=setting_menu)
-        self.opensettings_icon=PhotoImage(file="Button Images/open settings.png")
+        self.opensettings_icon=PhotoImage(file=get_image_path("open settings.png"))
         setting_menu.add_command(label="Open",image=self.opensettings_icon,compound="left", command=open_settings)
 
     #Default Mode Buttons and Label
         self.timer_lbl = Label(root, text = "25:00", font= ("Digital-7", 150,), fg ="black", bg = "IndianRed")
 
-        self.tomato_cycle_icon = PhotoImage(file="Button Images/tomato cycle.png")
+        self.tomato_cycle_icon = PhotoImage(file=get_image_path("tomato cycle.png"))
         self.cycles_lbl = Label(root, text="",image=self.tomato_cycle_icon,compound="left", font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
 
-        self.start_icon = PhotoImage(file="Button Images/start2.png")
-        self.stop_icon = PhotoImage(file="Button Images/stop.png")
-        self.reset_icon = PhotoImage(file="Button Images/repeat3.png")
+        self.start_icon = PhotoImage(file=get_image_path("tart2.png"))
+        self.stop_icon = PhotoImage(file=get_image_path("stop.png"))
+        self.reset_icon = PhotoImage(file=get_image_path("repeat3.png"))
 
         self.default_start_btn = Button(root, image=self.start_icon,command =self.start_default_time, borderwidth=0,bg="indianred", activebackground ="indianred", highlightthickness=0, relief='flat')
         self.default_stop_btn = Button(root,image=self.stop_icon,command =self.pause_default_time,borderwidth=0,bg="indianred",activebackground ="indianred", highlightthickness=0, relief='flat')
@@ -729,9 +736,9 @@ class MainInterface:
         self.relax_stop_btn = Button(root,image=self.stop_icon,command =self.pause_relax_time,borderwidth=0,bg="mediumseagreen", activebackground ="mediumseagreen", highlightthickness=0, relief='flat')
         self.relax_reset_btn = Button(root,image=self.reset_icon,command =self.reset_relax_time,borderwidth=0,bg="mediumseagreen", activebackground ="mediumseagreen", highlightthickness=0, relief='flat')
 
-        self.timer_icon = PhotoImage(file="Button Images/timer.png")
-        self.shortbreak_icon = PhotoImage(file="Button Images/short break.png")
-        self.longbreak_icon = PhotoImage(file="Button Images/long break.png")
+        self.timer_icon = PhotoImage(file=get_image_path("timer.png"))
+        self.shortbreak_icon = PhotoImage(file=get_image_path("short break.png"))
+        self.longbreak_icon = PhotoImage(file=get_image_path("long break.png"))
 
         self.session_type_img = Label(root, image=self.timer_icon,borderwidth=0,bg="indianred")
         self.session_type_lbl = Label(root, text="", font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
@@ -742,12 +749,12 @@ class MainInterface:
         self.relaxsession_type_img = Label(root, image=self.timer_icon,borderwidth=0,bg="mediumseagreen")
         self.relax_session_type_lbl = Label(root, text="", font=("Courier New", 20,"bold"), fg="black", bg="mediumseagreen") 
 
-        self.tomato_cycle_icon = PhotoImage(file="Button Images/tomato cycle.png")
+        self.tomato_cycle_icon = PhotoImage(file=get_image_path("tomato cycle.png"))
         self.cycles_lbl = Label(root, text="",image=self.tomato_cycle_icon,compound="left", font=("Times", 16), fg="black", bg="IndianRed")
     
 # Add background music button
-        self.music_on_icon = PhotoImage(file="Button Images/music on.png")
-        self.music_off_icon = PhotoImage(file="Button Images/music off.png")
+        self.music_on_icon = PhotoImage(file=get_image_path("music on.png"))
+        self.music_off_icon = PhotoImage(file=get_image_path("music off.png"))
         self.music_btn = Button(root,image=self.music_on_icon,command=self.toggle_music,borderwidth=0,bg="indianred", activebackground ="indianred", highlightthickness=0, relief='flat')
 
 #Main Interface to show Default Mode first
