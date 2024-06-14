@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from plyer import notification
 import threading
-import customtkinter
+
 
 
 
@@ -76,6 +76,10 @@ class MainInterface:
         self.short_break_sound = self.sound_files["Default Short Break"]
         self.long_break_sound = self.sound_files["Default Microwave"]
         self.background_color="Indianred"
+
+        self.badges = {5: "badge1.png", 5: "badge2.png", 5: "badge3.png"}  # Dictionary of badges and their cumulative time thresholds
+        self.collected_badges = []  # List to store collected badges
+        self.cumulative_time = 0  # Cumulative time counter
 
 #Study Mode variables
         self.study_run_timer = False
@@ -170,33 +174,7 @@ class MainInterface:
             pass
 
         def studylist_user():
-            customtkinter.set_appearance_mode("light")
-            customtkinter.set_default_color_theme("dark-blue")
-
-            self = customtkinter.CTk()
-
-            self.canvas = Canvas(self, bg="white")
-            self.scrollbar = Scrollbar(self, orient="vertical", command=self.canvas.yview)
-            self.scrollable_frame = Frame(self.canvas, bg="white")
-
-            def _on_mousewheel(self, event):
-                if event.delta < 0:  # Only scroll up when delta is negative
-                    self.canvas.yview_scroll(-1*(event.delta//200), "units")
-
-            self.scrollable_frame.bind(
-                "<Configure>",
-                lambda e: self.canvas.configure(
-                    scrollregion=self.canvas.bbox("all")
-                )
-            )
-
-            self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-            self.canvas.configure(yscrollcommand=self.scrollbar.set)
-
-            self.canvas.pack(side="left", fill="both", expand=True)
-            self.scrollbar.pack(side="right", fill="y")
-            
-            self.canvas.bind_all("<MouseWheel>",_on_mousewheel)
+            pass
 
 
 #Change to Default Mode
@@ -897,6 +875,10 @@ class MainInterface:
                 self.default_run_timer = False
                 self.alarm_sound(self.timer_type)
 
+                # Calculate cumulative time and check for achievements
+                self.cumulative_time += self.default_timer_duration  # Adjust based on session type
+                self.check_achievements()
+
                 if self.timer_type == "default_timer":
                     self.complete_pomodoro_session("Default", self.default_timer_duration, None, "Timer")
                 elif self.timer_type == "short_break":
@@ -965,6 +947,28 @@ class MainInterface:
     def resume_music(self):
         if self.is_music_playing:
             pygame.mixer.music.unpause()
+
+    def check_achievements(self):
+        for threshold, badge_path in self.badges.items():
+            if self.cumulative_time >= threshold and badge_path not in self.collected_badges:
+                self.collected_badges.append(badge_path)
+                self.achievement_unlocked(badge_path)
+
+    def achievement_unlocked(self, badge_path):
+        pygame.mixer.Sound("Sounds/Default Microwave LB.wav").play()
+        messagebox.showinfo("Achievement Unlocked!", "You've earned a new badge!")
+        self.display_badge(badge_path)
+
+    def display_badge(self, badge_path):
+        badge_window = Toplevel(root)
+        badge_window.title(f"Badge {badge_path}")
+        
+        badge_image_pil = Image.open(badge_path)
+        badge_image_tk = PhotoImage(file="badge1.png")
+        
+        badge_label = Label(badge_window, image=badge_image_tk)
+        badge_label.image = badge_image_tk
+        badge_label.pack()
 
 #################################################################################################################
 #STUDY#
@@ -1040,6 +1044,7 @@ class MainInterface:
             else:
                 self.study_run_timer = False
                 self.alarm_sound2(self.study_type)
+
 
                 if self.study_type == "study_timer":
                     self.study_type = "study_shortbreak"
