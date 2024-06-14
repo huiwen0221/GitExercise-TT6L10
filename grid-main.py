@@ -2,11 +2,14 @@ from tkinter import *
 import time
 import sqlite3
 from datetime import datetime
-from tkinter import ttk
-from tkinter import colorchooser
+from tkinter import ttk,colorchooser,PhotoImage, messagebox
 import pygame
-from tkinter import PhotoImage
-from tkinter import messagebox
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from plyer import notification
+import threading
 
 
 class MainInterface:
@@ -72,6 +75,11 @@ class MainInterface:
         self.long_break_sound = self.sound_files["Default Microwave"]
         self.background_color="Indianred"
 
+        self.badges = {5: "badge1.png", 5: "badge2.png", 5: "badge3.png"}  # Dictionary of badges and their cumulative time thresholds
+        self.collected_badges = []  # List to store collected badges
+        self.cumulative_time = 0  # Cumulative time counter
+
+#Study Mode variables
         self.study_run_timer = False
         self.study_start_timer = 0
         self.study_pause_timer = False
@@ -84,8 +92,7 @@ class MainInterface:
         self.study_type = "study_timer"
         self.study_cycle_count = 0
 
-################
-        # Relax mode timer variables
+#Relax Mode variables
         self.relax_run_timer = False
         self.relax_start_timer = 0
         self.relax_pause_timer = False
@@ -97,17 +104,76 @@ class MainInterface:
         self.relax_type = "relax_timer"
         self.relax_cycle_count = 0
 
+        self.current_plot = None
+
         def user_data():
-            pass
+            window = Toplevel(root)
+            window.title("Statistics")
+            window.geometry("800x600")
+
+            def plot_statistics(window, data, x_label, y_label):
+                # Clear the current plot if exist
+
+                fig, ax = plt.subplots(figsize=(10, 6))
+                # Break duration
+                ax.bar(data.index, data['Break Duration'], label='Break', color='blue', alpha=0.5)
+                # Timer duration
+                ax.bar(data.index, data['Timer Duration'], bottom=data['Break Duration'], label='Timer', color='orange', alpha=0.5)
+                ax.set_title('Pomodoro Statistics')
+                ax.set_xlabel(x_label)
+                ax.set_ylabel(y_label)
+                ax.legend()
+
+                canvas = FigureCanvasTkAgg(fig, master=window)
+                canvas.draw()
+                canvas.get_tk_widget().grid(row=1, column=0, columnspan=10, rowspan=9, sticky="nsew")
+                self.current_plot = canvas
+
+            def show_weekly():
+                self.cursor.execute('''
+                    SELECT strftime('%w', CompletionTime) AS Weekday, 
+                        SUM(CASE WHEN SessionType = 'Short Break' OR SessionType = 'Long Break' THEN Duration ELSE 0 END) AS BreakDuration, 
+                        SUM(CASE WHEN SessionType = 'Timer' THEN Duration ELSE 0 END) AS TimerDuration 
+                    FROM PomodoroSessions 
+                    GROUP BY Weekday
+                ''')
+                weekly_data = self.cursor.fetchall()
+                weekdays_order = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+                weekly = pd.DataFrame(weekly_data, columns=['Weekday', 'Break Duration', 'Timer Duration'])
+                weekly['Weekday'] = weekly['Weekday'].astype(int).apply(lambda x: weekdays_order[x])
+                weekly.set_index('Weekday', inplace=True)
+                weekly['Break Duration'] /= 60
+                weekly['Timer Duration'] /= 60
+                plot_statistics(window, data=weekly, x_label='Weekday', y_label='Duration (hours)')
+
+            def show_monthly():
+                self.cursor.execute('''
+                    SELECT strftime('%Y-%m', CompletionTime) AS MonthStart, 
+                        SUM(CASE WHEN SessionType = 'Short Break' OR SessionType = 'Long Break' THEN Duration ELSE 0 END) AS BreakDuration, 
+                        SUM(CASE WHEN SessionType = 'Timer' THEN Duration ELSE 0 END) AS TimerDuration 
+                    FROM PomodoroSessions 
+                    GROUP BY MonthStart
+                ''')
+                monthly_data = self.cursor.fetchall()
+                monthly = pd.DataFrame(monthly_data, columns=['MonthStart', 'Break Duration', 'Timer Duration'])
+                monthly.set_index('MonthStart', inplace=True)
+                monthly['Break Duration'] /= 60
+                monthly['Timer Duration'] /= 60
+                plot_statistics(window, data=monthly, x_label='Month Start', y_label='Duration (hours)')
+
+            # Buttons for weekly and monthly data
+            weekly_button = Button(window, text="Show Weekly", command=show_weekly)
+            weekly_button.grid(row=0, column=5, padx=10, pady=10)
+            monthly_button = Button(window, text="Show Monthly", command=show_monthly)
+            monthly_button.grid(row=0, column=6, padx=10, pady=10)
+
         
         def badges_user():
             pass
 
-        def calendar_user():
-            pass
-
         def studylist_user():
             pass
+
 
 #Change to Default Mode
         def switch_default_mode():
@@ -118,9 +184,9 @@ class MainInterface:
             self.default_stop_btn.grid(row=6, column =4,rowspan=3,columnspan=2,sticky="nsew")
             self.default_reset_btn.grid(row=6, column =6,rowspan=3,columnspan=2,sticky="nsew")
             self.music_btn.grid(row=0, column=9, sticky="nsew")
-            self.session_type_img.grid(row=1, column=9,sticky="nsew")
-            self.session_type_lbl.grid(row=2, column=9,sticky="nsew")
-            self.cycles_lbl.grid(row=3, column=9,sticky="nsew")
+            self.session_type_lbl.grid(row=3, column=9,sticky="nsew")
+            self.session_type_img.grid(row=4, column=9,sticky="nsew")
+            self.cycles_lbl.grid(row=9, column=2,sticky="nsew")
 
 #Change to Study Mode
         def study_mode():
@@ -131,8 +197,8 @@ class MainInterface:
             self.study_start_btn.grid(row=6, column =2,rowspan=3,columnspan=2,sticky="nsew")
             self.study_stop_btn.grid(row=6, column =4,rowspan=3,columnspan=2,sticky="nsew")
             self.study_reset_btn.grid(row=6, column =6,rowspan=3,columnspan=2,sticky="nsew")
-            self.studysession_type_img.grid(row=3, column=9,sticky="nsew")
-            self.study_session_type_lbl.grid(row=4, column=9,sticky="nsew")
+            self.studysession_type_img.grid(row=4, column=9,sticky="nsew")
+            self.study_session_type_lbl.grid(row=3, column=9,sticky="nsew")
 
 #Change to Relax Mode
         def relax_mode():
@@ -143,8 +209,8 @@ class MainInterface:
             self.relax_start_btn.grid(row=6, column =2,rowspan=3,columnspan=2,sticky="nsew")
             self.relax_stop_btn.grid(row=6, column =4,rowspan=3,columnspan=2,sticky="nsew")
             self.relax_reset_btn.grid(row=6, column =6,rowspan=3,columnspan=2,sticky="nsew") 
-            self.relaxsession_type_img.grid(row=3, column=9,sticky="nsew")
-            self.relax_session_type_lbl.grid(row=4, column=9,sticky="nsew")
+            self.relaxsession_type_img.grid(row=4, column=9,sticky="nsew")
+            self.relax_session_type_lbl.grid(row=3, column=9,sticky="nsew")
 
 #Hide other mode buttons when switching mode
         def hide_frames():
@@ -414,7 +480,7 @@ class MainInterface:
         def open_settings():
             global counter
 
-#Limiting Settings Window to only be opened one time
+    #Limiting Settings Window to only be opened one time
             if counter <2:
                 settings_window = Toplevel(root)
                 settings_window.title("Settings")
@@ -427,7 +493,7 @@ class MainInterface:
                 settings_window.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
                 settings_window.rowconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform='a')
 
-#TIMER DURATION ENTRYBOX
+    #TIMER DURATION ENTRYBOX
                 self.timersetting_icon = PhotoImage(file="Button Images/timer.png")
                 self.timersetting_img_lbl = Label(settings_window, image=self.timersetting_icon,bg="gray")
                 self.timersetting_img_lbl.grid(row = 0, column=0,sticky="w")
@@ -484,7 +550,7 @@ class MainInterface:
 
     #RESET PRESETS
                 self.reset_all_icon = PhotoImage(file="Button Images/reset all.png")
-                self.reset_all_btn=Button(settings_window, image=self.reset_all_icon, command=reset_default_mode,borderwidth=0,bg="gray", activebackground ="gray", highlightthickness=0)
+                self.reset_all_btn=Button(settings_window,text="Reset ALL Presets",font=("Arial",13),compound="top", image=self.reset_all_icon, command=reset_default_mode,borderwidth=0,bg="gray", activebackground ="gray", highlightthickness=0)
                 self.reset_all_btn.grid(row=8,column=8,columnspan=2,rowspan=2,sticky="se")
 
     #ENDING SOUNDS COMBOBOX
@@ -598,15 +664,15 @@ class MainInterface:
                 self.load_preset3_btn.grid(row=9,column=4,columnspan=1,sticky="w")
 
                 counter+=1
-            else:
+            else: 
                 messagebox.showinfo("Error","There is already a Settings window opened.")
 
 
-#MENU Taskbar
+#MENU Taskbar Main Interface
         menu_bar = Menu(root)
         root.config(menu=menu_bar)
 
-     #User Menu (Statistics, Achievements, Calendar, Study List)
+     #User Menu (Statistics, Achievements,Study List)
         user_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="User", menu=user_menu)
         self.statistics_icon=PhotoImage(file="Button Images/statistics.png")
@@ -614,8 +680,6 @@ class MainInterface:
         self.achievements_icon=PhotoImage(file="Button Images/achievements.png")
         user_menu.add_command(label="Achievements",image=self.achievements_icon,compound="left", command=badges_user)
         user_menu.add_separator()
-        self.calendar_icon=PhotoImage(file="Button Images/calendar.png")
-        user_menu.add_command(label="Calendar",image=self.calendar_icon,compound="left", command=calendar_user)
         self.studylist_icon=PhotoImage(file="Button Images/studylist.png")
         user_menu.add_command(label="Study List",image=self.studylist_icon,compound="left", command=studylist_user)
 
@@ -631,7 +695,7 @@ class MainInterface:
         self.relax_icon=PhotoImage(file="Button Images/relaxmode.png")
         mode_menu.add_command(label="Relax Mode",image=self.relax_icon,compound="left", command=relax_mode)
 
-    #Settings Menu(Open new settings window)
+    #Settings Open(Open new settings window)
         setting_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Settings",menu=setting_menu)
         self.opensettings_icon=PhotoImage(file="Button Images/open settings.png")
@@ -680,16 +744,18 @@ class MainInterface:
 
         self.tomato_cycle_icon = PhotoImage(file="Button Images/tomato cycle.png")
         self.cycles_lbl = Label(root, text="",image=self.tomato_cycle_icon,compound="left", font=("Times", 16), fg="black", bg="IndianRed")
-        # Add background music button
+    
+# Add background music button
         self.music_on_icon = PhotoImage(file="Button Images/music on.png")
         self.music_off_icon = PhotoImage(file="Button Images/music off.png")
         self.music_btn = Button(root,image=self.music_on_icon,command=self.toggle_music,borderwidth=0,bg="indianred", activebackground ="indianred", highlightthickness=0, relief='flat')
-        # Background music control
 
+#Main Interface to show Default Mode first
         switch_default_mode()
 
 ###########################################################################################################
 #DEFAULT#
+
 # Default mode timer variables
         self.default_run_timer = False
         self.default_start_timer = 0
@@ -701,14 +767,15 @@ class MainInterface:
 
         self.timer_type = "default_timer"
 
-        self.default_timer_sound = "Default Timer Alarm.wav"
-        self.default_short_break_sound = "Default SB.wav"
-        self.default_long_break_sound = "Default Microwave LB.wav"
+        self.default_timer_sound = "Sounds/Default Timer Alarm.wav"
+        self.default_short_break_sound = "Sounds/Default SB.wav"
+        self.default_long_break_sound = "Sounds/Default Microwave LB.wav"
 
         self.number_cycles = 0  # Initialize number of cycles to zero
         self.current_cycle = 0  #Current cycles is zero
         self.update_cycle_count_label()
 
+#Music Button Toggle ON/OFF
     def toggle_music(self):
         if self.is_music_playing:
             pygame.mixer.music.stop()
@@ -719,14 +786,6 @@ class MainInterface:
             pygame.mixer.music.play(-1)  # Play the music indefinitely
             self.is_music_playing = True
             self.music_btn.config(image=self.music_off_icon)
-
-    def complete_pomodoro_session(self, mode, timer_duration, short_break_duration, long_break_duration):
-        self.insert_pomodoro_session(mode, 'Timer', timer_duration)
-        if short_break_duration is not None:
-            self.insert_pomodoro_session(mode, 'Short Break', short_break_duration)
-        if long_break_duration is not None:
-            self.insert_pomodoro_session(mode, 'Long Break', long_break_duration)
-        self.conn.commit()
 
     def defaultmode_timer(self): #25 mins
         self.default_remaining_time = self.default_timer_duration
@@ -814,6 +873,10 @@ class MainInterface:
                 self.default_run_timer = False
                 self.alarm_sound(self.timer_type)
 
+                # Calculate cumulative time and check for achievements
+                self.cumulative_time += self.default_timer_duration  # Adjust based on session type
+                self.check_achievements()
+
                 if self.timer_type == "default_timer":
                     self.complete_pomodoro_session("Default", self.default_timer_duration, None, "Timer")
                 elif self.timer_type == "short_break":
@@ -883,6 +946,28 @@ class MainInterface:
         if self.is_music_playing:
             pygame.mixer.music.unpause()
 
+    def check_achievements(self):
+        for threshold, badge_path in self.badges.items():
+            if self.cumulative_time >= threshold and badge_path not in self.collected_badges:
+                self.collected_badges.append(badge_path)
+                self.achievement_unlocked(badge_path)
+
+    def achievement_unlocked(self, badge_path):
+        pygame.mixer.Sound("Sounds/Default Microwave LB.wav").play()
+        messagebox.showinfo("Achievement Unlocked!", "You've earned a new badge!")
+        self.display_badge(badge_path)
+
+    def display_badge(self, badge_path):
+        badge_window = Toplevel(root)
+        badge_window.title(f"Badge {badge_path}")
+        
+        badge_image_pil = Image.open(badge_path)
+        badge_image_tk = PhotoImage(file="badge1.png")
+        
+        badge_label = Label(badge_window, image=badge_image_tk)
+        badge_label.image = badge_image_tk
+        badge_label.pack()
+
 #################################################################################################################
 #STUDY#
 
@@ -899,9 +984,9 @@ class MainInterface:
         self.study_cycle_count = 0
 
         #Load sounds
-        self.study_timer_sound = pygame.mixer.Sound("Study Referee Alarm.wav")
-        self.study_shortbreak_sound = pygame.mixer.Sound("Study Churchbell SB.wav")
-        self.study_longbreak_sound = pygame.mixer.Sound("Study Great Harp LB.wav")
+        self.study_timer_sound = pygame.mixer.Sound("Sounds/Study Referee Alarm.wav")
+        self.study_shortbreak_sound = pygame.mixer.Sound("Sounds/Study Churchbell SB.wav")
+        self.study_longbreak_sound = pygame.mixer.Sound("Sounds/Study Great Harp LB.wav")
 
 
 ##STUDY MODE
@@ -957,6 +1042,7 @@ class MainInterface:
             else:
                 self.study_run_timer = False
                 self.alarm_sound2(self.study_type)
+
 
                 if self.study_type == "study_timer":
                     self.study_type = "study_shortbreak"
@@ -1026,9 +1112,9 @@ class MainInterface:
         self.relax_cycle_count = 0
 
         #Load sounds
-        self.relax_timer_sound = pygame.mixer.Sound("Relax Chime Alarm.wav")
-        self.relax_shortbreak_sound = pygame.mixer.Sound("Relax WindChimes SB.wav")
-        self.relax_longbreak_sound = pygame.mixer.Sound("Relax Harp LB.wav")
+        self.relax_timer_sound = pygame.mixer.Sound("Sounds/Relax Chime Alarm.wav")
+        self.relax_shortbreak_sound = pygame.mixer.Sound("Sounds/Relax WindChimes SB.wav")
+        self.relax_longbreak_sound = pygame.mixer.Sound("Sounds/Relax Harp LB.wav")
 
 ##RELAX
     def relaxmode_timer(self): #15 mins
@@ -1137,14 +1223,22 @@ class MainInterface:
         elif relax_type == "relax_longbreak":
             self.relax_longbreak_sound.play()
 
-    def insert_pomodoro_session(self, mode, session_type, duration, user='Alice'):
+    def insert_pomodoro_session(self, mode, session_type, duration, user='John'):
         completion_time = datetime.now().isoformat()  # Get the current completion time
 
         # Execute the SQL query to insert the session into the table
         self.cursor.execute('''
-        INSERT INTO PomodoroSessions (User, Mode, SessionType, Duration, CompletionTime)
-        VALUES (?, ?, ?, ?, ?)
+            INSERT INTO PomodoroSessions (User, Mode, SessionType, Duration, CompletionTime)
+            VALUES (?, ?, ?, ?, ?)
         ''', (user, mode, session_type, duration, completion_time))
+        self.conn.commit()
+
+    def complete_pomodoro_session(self, mode, timer_duration, short_break_duration=None, long_break_duration=None):
+        self.insert_pomodoro_session(mode, 'Timer', timer_duration)
+        if short_break_duration is not None:
+            self.insert_pomodoro_session(mode, 'Short Break', short_break_duration)
+        if long_break_duration is not None:
+            self.insert_pomodoro_session(mode, 'Long Break', long_break_duration)
         self.conn.commit()
 
 if __name__ == "__main__":
