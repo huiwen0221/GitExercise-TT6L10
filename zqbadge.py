@@ -1,8 +1,9 @@
 from tkinter import *
 import time
 import sqlite3
+import os
 from datetime import datetime
-from tkinter import ttk,colorchooser,PhotoImage, messagebox
+from tkinter import ttk,colorchooser,PhotoImage, messagebox, Label
 import pygame
 import pandas as pd
 import numpy as np
@@ -10,8 +11,6 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from plyer import notification
 import threading
-
-
 
 class MainInterface:
     def __init__(self,root):
@@ -60,15 +59,15 @@ class MainInterface:
         );""")
 
         self.sound_files = {
-            "Default Alarm": "Default Timer Alarm.wav",
-            "Referee Whistle": "Study Referee Alarm.wav",
-            "Chime": "Relax Chime Alarm.wav",
-            "Default Short Break": "Default SB.wav",
-            "Churchbell": "Study Churchbell SB.wav",
-            "Wind Chimes": "Relax WindChimes SB.wav",
-            "Default Microwave": "Default Microwave LB.wav",
-            "Great Harp": "Study Great Harp LB.wav",
-            "Relaxing Harp": "Relax Harp LB.wav"
+            "Default Alarm": "Sounds/Default Timer Alarm.wav",
+            "Referee Whistle": "Sounds/Study Referee Alarm.wav",
+            "Chime": "Sounds/Relax Chime Alarm.wav",
+            "Default Short Break": "Sounds/Default SB.wav",
+            "Churchbell": "Sounds/Study Churchbell SB.wav",
+            "Wind Chimes": "Sounds/Relax WindChimes SB.wav",
+            "Default Microwave": "Sounds/Default Microwave LB.wav",
+            "Great Harp": "Sounds/Study Great Harp LB.wav",
+            "Relaxing Harp": "Sounds/Relax Harp LB.wav"
         }
 
         self.timer_end_sound = self.sound_files["Default Alarm"]
@@ -76,9 +75,23 @@ class MainInterface:
         self.long_break_sound = self.sound_files["Default Microwave"]
         self.background_color="Indianred"
 
-        self.badges = {5: "badge1.png", 5: "badge2.png", 5: "badge3.png"}  # Dictionary of badges and their cumulative time thresholds
-        self.collected_badges = []  # List to store collected badges
-        self.cumulative_time = 0  # Cumulative time counter
+        self.cumulative_time = 0  # Initialize cumulative time to zero
+        self.badges = {
+            5: "badge1.png",
+            15: "badge2.png",
+            30: "badge3.png"
+        }
+    
+     # Load badge images
+        self.badge_images = {
+            5: PhotoImage(file="badge1.png"),
+            15: PhotoImage(file="badge2.png"),
+            30: PhotoImage(file="badge3.png")
+        }
+
+         # Create a label to display badges
+        self.badge_label = Label(root, bg=self.background_color)
+        self.badge_label.grid(row=8, column=9, sticky="nsew")
 
 #Study Mode variables
         self.study_run_timer = False
@@ -186,8 +199,7 @@ class MainInterface:
             self.music_btn.grid(row=0, column=9, sticky="nsew")
             self.session_type_lbl.grid(row=3, column=9,sticky="nsew")
             self.session_type_img.grid(row=4, column=9,sticky="nsew")
-            self.cycles_lbl.grid(row=9, column=1,sticky="nsew")
-            self.current_tomato_lbl.grid(row=9, column=0,sticky="nsew")
+            self.cycles_lbl.grid(row=9, column=2,sticky="nsew")
 
 #Change to Study Mode
         def study_mode():
@@ -220,7 +232,6 @@ class MainInterface:
             self.default_start_btn.grid_forget()
             self.default_stop_btn.grid_forget()
             self.default_reset_btn.grid_forget()
-            self.current_tomato_lbl.grid_forget()
             self.cycles_lbl.grid_forget()
             self.session_type_img.grid_forget()
             self.session_type_lbl.grid_forget()
@@ -285,18 +296,13 @@ class MainInterface:
 
         def save_preset_settings(preset_number):
             # Retrieve settings from UI inputs
-            try:
-                timer_minutes = int(self.timer_entry.get())
-                timer_seconds = int(self.timerseconds_entry.get())
-                shortbreak_minutes = int(self.shortbreak_entry.get())
-                shortbreak_seconds = int(self.shortbreakseconds_entry.get())
-                longbreak_minutes = int(self.longbreak_entry.get())
-                longbreak_seconds = int(self.longbreakseconds_entry.get())
-                repeat_cycles = int(self.repeat_cycles_entry.get())
-            except ValueError:
-        # If any of the entries cannot be converted to an integer, show an error message
-                messagebox.showerror("Input Error", "Please enter valid numbers in all entry boxes.")
-                return
+            timer_minutes = int(self.timer_entry.get() or 0)
+            timer_seconds = int(self.timerseconds_entry.get() or 0)
+            shortbreak_minutes = int(self.shortbreak_entry.get() or 0)
+            shortbreak_seconds = int(self.shortbreakseconds_entry.get() or 0)
+            longbreak_minutes = int(self.longbreak_entry.get() or 0)
+            longbreak_seconds = int(self.longbreakseconds_entry.get() or 0)
+            repeat_cycles = int(self.repeat_cycles_entry.get() or 0)
 
             timer_duration = timer_minutes * 60 + timer_seconds
             shortbreak_duration = shortbreak_minutes * 60 + shortbreak_seconds
@@ -711,7 +717,6 @@ class MainInterface:
     #Default Mode Buttons and Label
         self.timer_lbl = Label(root, text = "25:00", font= ("Digital-7", 150,), fg ="black", bg = "IndianRed")
 
-        self.current_tomato_lbl = Label(root,text="Current\nCycles",font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
         self.tomato_cycle_icon = PhotoImage(file="tomato cycle.png")
         self.cycles_lbl = Label(root, text="",image=self.tomato_cycle_icon,compound="left", font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
 
@@ -795,23 +800,39 @@ class MainInterface:
             self.is_music_playing = True
             self.music_btn.config(image=self.music_off_icon)
 
-    def defaultmode_timer(self): #25 mins
-        self.default_remaining_time = self.default_timer_duration
-        self.timer_type = "default_timer"
-        self.start_default_time()
+    def initialize_app(self, root):
+        self.root = root
+        self.default_timer_duration = 1500  # 25 mins in seconds
+        self.default_shortbreak_duration = 300  # 5 mins in seconds
+        self.default_longbreak_duration = 900  # 15 mins in seconds
+        
+        self.default_remaining_time = 0
+        self.timer_type = ""
+        self.default_run_timer = False
+        self.cumulative_time = 0
+        self.collected_badges = []
 
-    def defaultmode_shortbreak(self): #5 mins
-        self.default_timer_duration = self.default_shortbreak_duration
-        self.default_remaining_time = self.default_timer_duration
-        self.timer_type = "short_break"
-        self.start_default_time()
+        self.badges = {
+        5: "Badge/badge1.png",
+        15: "Badge/badge2.png",
+        30: "Badge/badge3.png"
+        }
 
-    def defaultmode_longbreak(self): #15 mins
-        self.default_timer_duration = self.default_longbreak_duration
-        self.default_remaining_time = self.default_timer_duration
-        self.timer_type = "long_break"
-        self.start_default_time()
+    def defaultmode_timer(self):
+        self.set_timer("default_timer", self.default_timer_duration)
 
+    def defaultmode_shortbreak(self):
+        self.set_timer("short_break", self.default_shortbreak_duration)
+
+    def defaultmode_longbreak(self):
+        self.set_timer("long_break", self.default_longbreak_duration)
+
+    def set_timer(self, timer_type, duration):
+        self.default_timer_duration = duration
+        self.default_remaining_time = duration
+        self.timer_type = timer_type
+        self.start_default_time()
+    
     # Default mode timer functions
     def start_default_time(self):
         if not self.default_run_timer:
@@ -868,7 +889,7 @@ class MainInterface:
 
     def update_default_time(self):
         if self.default_run_timer:
-            current_time = time.time()  # Get current time and find the time passed since it started
+            current_time = time.time()
             time_passed = current_time - self.default_start_timer
             self.default_remaining_time = max(self.default_remaining_time - time_passed, 0)  # Prevents remaining time from becoming less than 0
             self.update_default_display()
@@ -882,7 +903,7 @@ class MainInterface:
                 self.alarm_sound(self.timer_type)
 
                 # Calculate cumulative time and check for achievements
-                self.cumulative_time += self.default_timer_duration  # Adjust based on session type
+                self.cumulative_time += time_passed  # Adjust based on the actual time passed
                 self.check_achievements()
 
                 if self.timer_type == "default_timer":
@@ -894,10 +915,11 @@ class MainInterface:
 
                 # Wait for the sound to finish before starting the next session
                 sound_length = pygame.mixer.Sound(self.timer_end_sound).get_length() * 1000  # Convert seconds to milliseconds
-                self.root.after(int(sound_length), self.start_cycle) 
+                self.root.after(int(sound_length), self.start_cycle)
                 self.update_default_display()
                 # Update cycle count label
                 self.update_cycle_count_label()
+
 
     # Call this method to start the pomodoro cycles
     def initialize_cycles(self, number_of_cycles):
@@ -910,7 +932,6 @@ class MainInterface:
         seconds = int(self.default_remaining_time % 60)
         time_str = "{:02d}:{:02d}".format(minutes, seconds)
         self.timer_lbl.config(text=time_str)
-        self.update_session_type_label()
 
     def update_cycle_count_label(self):
         # Ensure cycle count doesn't go below zero
@@ -961,18 +982,21 @@ class MainInterface:
                 self.achievement_unlocked(badge_path)
 
     def achievement_unlocked(self, badge_path):
+        pygame.mixer.Sound("Default Microwave LB.wav").play()
         messagebox.showinfo("Achievement Unlocked!", "You've earned a new badge!")
         self.display_badge(badge_path)
 
     def display_badge(self, badge_path):
-        badge_window = Toplevel(root)
-        badge_window.title(f"{badge_path}")
+        badge_name = os.path.basename(badge_path)
+        badge_window = Toplevel(self.root)
+        badge_window.title(f"Badge {badge_name}")
+
+        # Load badge image using os module
+        badge_image = PhotoImage(file="badge1.png")
         
-        badge_image_tk = PhotoImage(file="badge1.png")
-        
-        badge_label = Label(badge_window, image=badge_image_tk)
-        badge_label.image = badge_image_tk
-        badge_label.pack()
+        badge_label = Label(badge_window, image=badge_image)
+        badge_label.image = badge_image
+        self.badge_label.grid(row=8, column=9, sticky="nsew")
 
 #################################################################################################################
 #STUDY#
