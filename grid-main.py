@@ -59,6 +59,7 @@ class MainInterface:
             Volume INTEGER
         );""")
 
+
         self.sound_files = {
             "Default Alarm": "Default Timer Alarm.wav",
             "Referee Whistle": "Study Referee Alarm.wav",
