@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from plyer import notification
 import threading
+from tkcalendar import Calendar
 
 class MainInterface:
     def __init__(self,root):
@@ -183,6 +184,332 @@ class MainInterface:
 
         def studylist_user():
             pass
+        def studylist_user():
+            study = Toplevel(root)
+            study.title("Study List")
+            study.geometry("1300x600")
+            study.configure(bg="Indian Red")
+            study.columnconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9), weight=1, uniform='a')
+            study.rowconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9), weight=1, uniform='a')
+            calendar_button = Button(study, text="Calendar", command= open_calendar, bg="white")
+            calendar_button.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+
+            title_label = Label(study, text="Study List", font=("Cooper Black", 45), bg="Indian Red")
+            title_label.grid(row=0, column=2, columnspan=5, sticky="nsew")
+
+            new_task_entry = Entry(study, font=("Times New Roman", 17), width=20)
+            new_task_entry.grid(row=1, column=0, columnspan=7, sticky="ew", padx=(10, 0))
+
+            due_date_button = Button(study, text="Select Due Date", command=select_due_date, font=("Times New Roman", 13), bg="white")
+            due_date_button.grid(row=1, column=7, padx=0, sticky="ew")
+
+            due_time_button = Button(study, text="Select Due Time", command=select_time, font=("Times New Roman", 13), bg="white")
+            due_time_button.grid(row=1, column=8, padx=0, sticky="ew")
+
+            add_button = Button(study, text="Add", command=add_task, font=("Times New Roman", 13), bg="white")
+            add_button.grid(row=1, column=9, padx=(0, 10), sticky="ew")
+            selected_date = None
+            selected_time = None
+            study_frame = Frame(study, bg="white")
+            study_frame.grid(row=2, column=0, columnspan=10, rowspan=9, padx=20, pady=10, sticky="nsew")
+
+            study_label = Label(study_frame, text="To Do:", font=("Cooper Black", 30), bg="white")
+            study_label.grid(row=0, column=0, columnspan=9, pady=5)
+
+            delete_selected_button = Button(study, text="Delete Selected Tasks", command=delete_selected_tasks)
+            delete_selected_button.grid(row=9, column=3, columnspan=3, pady=1)
+
+            task_widgets = []
+            task_count = 0
+            task_count_label = Label(study_frame, text="Number of tasks: 0", font=("Times New Roman", 10), bg="white")
+            task_count_label.grid(row=1, column=0, padx=20, sticky="w")
+            delete_all_button = Button(self, text="Delete All Task", command=delete_all_tasks, font=("Times New Roman", 10), bg="white")
+            delete_all_button.grid(row=9, column=5, columnspan=4, pady=1)
+
+            calendar_tasks = {}
+
+            # Initialize the SQLite database
+            conn = sqlite3.connect("tasks.db")
+            create_table(study)
+            load_tasks(study)
+
+            # Initialize the SQLite database
+            conn = sqlite3.connect("tasks.db")
+                    
+            def create_table():
+                with conn:
+                    conn.execute("""
+                        CREATE TABLE IF NOT EXISTS tasks (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            task TEXT NOT NULL,
+                            due_date TEXT NOT NULL,
+                            due_time TEXT NOT NULL
+                            )
+                        """)
+                
+            def load_tasks():
+                cursor = conn.cursor()
+                cursor.execute("SELECT task, due_date, due_time FROM tasks")
+                tasks = cursor.fetchall()
+                for new_task, due_date, due_time in tasks:
+                    add_task_to_study_list(new_task, due_date, due_time, from_db=True)
+
+            def select_due_date():
+                top = Toplevel(study)
+                cal = Calendar(top, selectmode='day', date_pattern='yyyy-mm-dd', font=('Times New Roman', 10), bg="light yellow")
+                cal.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+
+            def confirm_due_date():
+                nonlocal selected_date
+                selected_date = cal.get_date()
+                top.destroy()
+                        
+                confirm_button = Button(top, text="Confirm", command=confirm_due_date, font=("Times New Roman", 10), bg="light yellow")
+                confirm_button.grid(row=1, column=0, pady=5, sticky="s")
+
+                top.grid_rowconfigure(0, weight=1)
+                top.grid_columnconfigure(0, weight=1)
+
+            def select_time():
+                top = Toplevel(study)
+                top.title("Select Time")
+                top.geometry("200x300")
+
+
+                hour_label = Label(top, text="Hour (0-23):", font=("Times New Roman", 10))
+                hour_label.grid(row=0, column=0, padx=20, pady=10, sticky="w")
+                hour_combobox = ttk.Combobox(top, font=("Times New Roman", 10), values=[f"{i:02d}" for i in range(24)])
+                hour_combobox.grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                hour_combobox.current(0)  # Set default value to 00
+
+                minute_label = Label(top, text="Minute (0-59):", font=("Times New Roman", 10))
+                minute_label.grid(row=2, column=0, padx=20, pady=10, sticky="w")
+                minute_combobox = ttk.Combobox(top, font=("Times New Roman", 10), values=[f"{i:02d}" for i in range(60)])
+                minute_combobox.grid(row=3, column=0, padx=20, pady=10, sticky="w")
+                minute_combobox.current(0)  # Set default value to 00
+
+            def confirm_time( hour, minute, top):
+                selected_time = f"{hour}:{minute}"
+                due_time_selected = True
+                top.destroy()
+                due_time_button.config(state=DISABLED)  # Disable the due time button after selection
+                    
+                confirm_button = Button(top, text="Confirm", font=("Times New Roman", 10), command=confirm_time)
+                confirm_button.grid(row=4, column=0, padx=20, pady=20, sticky="ew")
+
+            def add_completed_column():
+                cursor = conn.cursor()
+                cursor.execute("PRAGMA table_info(tasks)")
+                columns = [column[1] for column in cursor.fetchall()]
+                if 'completed' not in columns:
+                    with conn:
+                        conn.execute("ALTER TABLE tasks ADD COLUMN completed INTEGER DEFAULT 0")
+                        conn.commit()
+                
+            def add_task():
+                new_task = new_task_entry.get()
+                if new_task and selected_date and selected_time:
+                    add_task_to_study_list(new_task, selected_date, selected_time)
+                    new_task_entry.delete(0, "end")
+                    selected_date = None
+                    selected_time = None
+                else:
+                    messagebox.showwarning("Warning", "Please enter a task, select its due date, and set the time.")
+
+            def save_task(new_task, due_date, due_time):
+                with conn:
+                    conn.execute("INSERT INTO tasks (task, due_date, due_time) VALUES (?, ?, ?)", (new_task, due_date, due_time))
+                    conn.commit()
+
+            def add_task_to_study_list(new_task, due_date, due_time, from_db=False):
+                task_row = task_count + 2
+
+
+                # Checkbutton for new task
+                task_checkbutton = Checkbutton(study_frame, text=new_task, font=("Times New Roman", 20), bg="white")
+                task_checkbutton.grid(row=task_row, column=0, sticky="w", pady=(5, 0))
+
+                task_checkbutton.var = BooleanVar()
+                task_checkbutton.config(variable=task_checkbutton.var, command=lambda cb=task_checkbutton, dt=due_date, tt=new_task, tm=due_time: self.mark_completed(cb, tt, dt, tm))
+
+                # Frame to hold due date and due time
+                due_info_frame = Frame(study_frame, bg="light yellow")
+                due_info_frame.grid(row=task_row, column=1, sticky="ew", padx=20, pady=(5, 0), columnspan=2)
+
+                # Frame to hold both due date and due time in the same box
+                due_date_time_frame = Frame(due_info_frame, bd=1, relief=SOLID, bg="light yellow")
+                due_date_time_frame.pack(side="left", padx=5, fill=X, expand=True)
+
+                # Due date label
+                due_date_label = Label(due_date_time_frame, text=f"Due Date: {due_date}", font=("Times New Roman", 10), bg="light yellow")
+                due_date_label.pack(padx=5, pady=2)
+
+                 # Due time label
+                due_time_label = Label(due_date_time_frame, text=f"Due Time: {due_time}", font=("Times New Roman", 10), bg="light yellow")
+                due_time_label.pack(padx=5, pady=2)
+                task_widgets.append((task_checkbutton, due_info_frame))
+
+                task_count += 1
+                task_count_label.config(text=f"Number of tasks: {task_count}")
+
+                if due_date not in self.calendar_tasks:
+                calendar_tasks[due_date] = []
+                calendar_tasks[due_date].append((new_task, due_time))
+
+                if not from_db:
+                   save_task(new_task, due_date, due_time)
+
+                    study.update_idletasks()
+                    schedule_notification(study,new_task, due_date, due_time)
+
+
+
+            def update_task_count_label():
+                task_count_label.config(text=f"Number of tasks: {task_count}")
+
+            def delete_selected_tasks():
+                nonlocal task_count
+
+                selected_tasks = [task_widget for task_widget in task_widgets if task_widget[0].var.get()]
+                        
+                # Collect information to delete from the database
+                tasks_to_delete = []
+                for task_widget in selected_tasks:
+                    task_text = task_widget[0].cget("text")
+                            
+                    # Get the children of due_info_frame's child frame, which are due_date_label and due_time_label
+                    due_info_frame = task_widget[1]
+                    due_date_time_frame = due_info_frame.winfo_children()[0]  # This should be the frame containing the labels
+                    due_date_label = due_date_time_frame.winfo_children()[0]  # First child is the due date label
+                    due_time_label = due_date_time_frame.winfo_children()[1]  # Second child is the due time label
+                            
+                    due_date = due_date_label.cget("text").replace("Due Date: ", "")
+                    due_time = due_time_label.cget("text").replace("Due Time: ", "")
+                            
+                    tasks_to_delete.append((task_text, due_date, due_time))
+
+                # Destroy the widgets
+                for task_widget in selected_tasks:
+                    task_widget[0].destroy()
+                    task_widget[1].destroy()
+                    task_widgets.remove(task_widget)
+                    task_count -= 1
+
+                update_task_count_label()
+
+                        # Delete selected tasks from the database
+                with conn:
+                    for task_text, due_date, due_time in tasks_to_delete:
+                        conn.execute("DELETE FROM tasks WHERE task = ? AND due_date = ? AND due_time = ?", (task_text, due_date, due_time))
+                conn.commit()
+                
+            def mark_completed(task_checkbutton, task, due_date, due_time):
+                if task_checkbutton.var.get():
+                    task_checkbutton.config(fg="green")
+                else:
+                    task_checkbutton.config(fg="black")
+                    
+            def delete_all_tasks(study):
+                for widget_tuple in study.task_widgets:
+                    widget_tuple[0].destroy()  # Destroy the checkbutton
+                    widget_tuple[1].destroy()  # Destroy the due date frame
+                    widget_tuple[2].destroy()  # Destroy the delete button
+                    task_widgets = []  # Clear the list of task widgets
+                    task_count = 0
+                    update_task_count_label()
+
+                        # Remove all tasks from database
+                with conn:
+                    conn.execute("DELETE FROM tasks")
+
+                # Update the calendar frame if it's open
+                update_calendar_frame()
+
+                                        
+            def delete_task_from_db( task, due_date, due_time):
+                with conn:
+                    print(f"Executing DELETE FROM tasks WHERE task = '{task}' AND due_date = '{due_date}' AND due_time = '{due_time}'")  # Debug print
+                    conn.execute("DELETE FROM tasks WHERE task = ? AND due_date = ? AND due_time = ?", (task, due_date, due_time))
+                    conn.commit()  # Ensure the deletion is committed
+
+            def open_calendar(study):
+                # Close previous calendar window if exists
+                if hasattr(study, "calendar_window"):
+                calendar_window.destroy()
+
+                            # Create a top-level window for the calendar
+                calendar_window = Toplevel(study)
+                calendar_window.title("Calendar")
+                calendar_window.geometry("600x400")  # Set the size of the Toplevel window
+
+
+                            # Create the calendar widget
+                calendar = Calendar(calendar_window, font="Arial 14", selectmode='day')
+                calendar.grid(row=0, column=0, sticky="nsew")
+
+                            # Bind a function to handle date selection on the calendar
+                calendar.bind("<<CalendarSelected>>", lambda event: display_calendar_tasks(event, calendar, calendar_window))
+
+                            # Frame to display the tasks for the selected date
+                task_frame = Frame(calendar_window, bg="light yellow", width=200)  # Fixed width for smaller size
+                task_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+
+                            # Configure grid weights for resizing
+                calendar_window.grid_columnconfigure(0, weight=1)
+                calendar_window.grid_columnconfigure(1, weight=1)
+                calendar_window.grid_rowconfigure(0, weight=1)
+                            # Update the calendar frame to reflect current tasks
+                update_calendar_frame()
+
+
+            def display_calendar_tasks( study,event, calendar, calendar_window):
+                            # Get the selected date from the calendar
+                            # Get the selected date from the calendar
+                selected_date = datetime.strptime(calendar.get_date(), "%m/%d/%y").strftime("%Y-%m-%d")
+
+                            # Get tasks associated with the selected date
+                            tasks = calendar_tasks.get(selected_date, [])
+
+                            # Clear existing tasks
+                            for widget in study.task_frame.winfo_children():
+                                widget.destroy()
+
+                            # Create a label to show the selected date
+                            date_label = Label(study.task_frame, text=f"Tasks for {selected_date}", font=("Arial", 14), bg="light yellow")
+                            date_label.grid(pady=10)
+
+                            # Display tasks associated with the selected date
+                            for task, due_time in tasks:  # Each task is a tuple (task, due_time)
+                                task_label = Label(study.task_frame, text=f"{task} at {due_time}", font=("Arial", 12), bg="light yellow")
+                                task_label.grid(pady=5)
+                                    
+                    def update_calendar_frame(study):
+                        # Get the currently selected date from the calendar
+                        if hasattr(study, "calendar"):
+                            selected_date = datetime.strptime(study.calendar.get_date(), "%m/%d/%y").strftime("%Y-%m-%d")
+
+                            # Get tasks associated with the selected date
+                            tasks =calendar_tasks.get(selected_date, [])
+
+                            # Clear existing tasks
+                            for widget in study.task_frame.winfo_children():
+                                widget.destroy()
+                        
+                    def schedule_notification(study, task, due_date, due_time):
+                            due_datetime_str = f"{due_date} {due_time}"
+                            due_datetime = datetime.strptime(due_datetime_str, "%Y-%m-%d %H:%M")
+                            delay = (due_datetime - datetime.now()).total_seconds()
+
+                            if delay > 0:
+                                threading.Timer(delay, show_notification, args=(task,)).start()
+                                print(f"Scheduled notification for task '{task}' at {due_datetime_str}")
+
+                    def show_notification(study, task):
+                            notification.notify(
+                                title="Task Due",
+                                message=f"The task '{task}' is due now!",
+                                timeout=10
+        )
 
 #Change to Default Mode
         def switch_default_mode():
