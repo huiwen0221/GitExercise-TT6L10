@@ -4,14 +4,13 @@ import sqlite3
 from datetime import datetime
 from tkinter import ttk,colorchooser,PhotoImage, messagebox
 import pygame
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from plyer import notification
 import threading
-import os
-
 
 class MainInterface:
     def __init__(self,root):
@@ -20,9 +19,7 @@ class MainInterface:
         self.root.geometry("1000x700")
         self.root.configure(bg = "IndianRed")
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        self.window_icon = PhotoImage(file=os.path.join(base_dir, "pomodoro helper.png"))
+        self.window_icon = PhotoImage(file="pomodoro helper.png")
         self.root.iconphoto(False,self.window_icon)
 
         pygame.init()
@@ -61,17 +58,16 @@ class MainInterface:
             Volume INTEGER
         );""")
 
-
         self.sound_files = {
-            "Default Alarm":os.path.join(base_dir,"Default Timer Alarm.wav"),
-            "Referee Whistle": os.path.join(base_dir,"Study Referee Alarm.wav"),
-            "Chime": os.path.join(base_dir,"Relax Chime Alarm.wav"),
-            "Default Short Break": os.path.join(base_dir,"Default SB.wav"),
-            "Churchbell": os.path.join(base_dir,"Study Churchbell SB.wav"),
-            "Wind Chimes": os.path.join(base_dir,"Relax WindChimes SB.wav"),
-            "Default Microwave": os.path.join(base_dir,"Default Microwave LB.wav"),
-            "Great Harp": os.path.join(base_dir,"Study Great Harp LB.wav"),
-            "Relaxing Harp": os.path.join(base_dir,"Relax Harp LB.wav")
+            "Default Alarm": "Default Timer Alarm.wav",
+            "Referee Whistle": "Study Referee Alarm.wav",
+            "Chime": "Relax Chime Alarm.wav",
+            "Default Short Break": "Default SB.wav",
+            "Churchbell": "Study Churchbell SB.wav",
+            "Wind Chimes": "Relax WindChimes SB.wav",
+            "Default Microwave": "Default Microwave LB.wav",
+            "Great Harp": "Study Great Harp LB.wav",
+            "Relaxing Harp": "Relax Harp LB.wav"
         }
 
         self.timer_end_sound = self.sound_files["Default Alarm"]
@@ -80,13 +76,18 @@ class MainInterface:
         self.background_color="Indianred"
 
         self.badges = {
-            15: os.path.join(base_dir,"badge1.png"),
-            30: os.path.join(base_dir,"badge2.png"),
-            60: os.path.join(base_dir,"badge3.png")
-        } 
-        # Dictionary of badges and their cumulative time thresholds
+            5: "badge1.png",
+            15: "badge2.png",
+            30: "badge3.png"
+        }  # Dictionary of badges and their cumulative time thresholds
         self.collected_badges = []  # List to store collected badges
         self.cumulative_time = 0  # Cumulative time counter
+
+        # Check if all badge images exist
+        for threshold, badge_path in self.badges.items():
+            if not os.path.exists(badge_path):
+                print(f"Warning: Badge image {badge_path} does not exist.")
+
 
 #Study Mode variables
         self.study_run_timer = False
@@ -114,7 +115,6 @@ class MainInterface:
         self.relax_cycle_count = 0
 
         self.current_plot = None
-
 
         def user_data():
             window = Toplevel(root)
@@ -503,14 +503,14 @@ class MainInterface:
                 settings_window.geometry("500x500")
                 settings_window.configure(bg ="gray")
 
-                self.settingswindow_icon = PhotoImage(file=os.path.join(base_dir, "user setting1.png"))
+                self.settingswindow_icon = PhotoImage(file="user setting1.png")
                 settings_window.iconphoto(False,self.settingswindow_icon)       
 
                 settings_window.columnconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform ='a')
                 settings_window.rowconfigure((0,1,2,3,4,5,6,7,8,9),weight = 1, uniform='a')
 
     #TIMER DURATION ENTRYBOX
-                self.timersetting_icon = PhotoImage(file=os.path.join(base_dir, "timer.png"))
+                self.timersetting_icon = PhotoImage(file="timer.png")
                 self.timersetting_img_lbl = Label(settings_window, image=self.timersetting_icon,bg="gray")
                 self.timersetting_img_lbl.grid(row = 0, column=0,sticky="w")
                 self.timer_entry_lbl= Label(settings_window, text="Timer Duration:", font=("Arial",18), bg="gray", fg="black")
@@ -525,8 +525,7 @@ class MainInterface:
                 self.timerseconds_entry.insert(0,"00")
 
     #SHORT BREAK DURATION ENTRYBOX
-                
-                self.shortbreaksetting_icon = PhotoImage(file=os.path.join(base_dir, "short break.png"))
+                self.shortbreaksetting_icon = PhotoImage(file="short break.png")
                 self.shortbreaksetting_img_lbl = Label(settings_window, image=self.shortbreaksetting_icon,bg="gray")
                 self.shortbreaksetting_img_lbl.grid(row = 1, column=0,sticky="w")
                 self.shortbreak_entry_lbl= Label(settings_window, text="Short Break Duration:", font=("Arial",18), bg="gray", fg="black")
@@ -541,7 +540,7 @@ class MainInterface:
                 self.shortbreakseconds_entry.insert(0, "00")
 
     #LONG BREAK DURATION ENTRYBOX
-                self.longbreaksetting_icon = PhotoImage(file=os.path.join(base_dir, "long break.png"))
+                self.longbreaksetting_icon = PhotoImage(file="long break.png")
                 self.longbreaksetting_img_lbl = Label(settings_window, image=self.longbreaksetting_icon,bg="gray")
                 self.longbreaksetting_img_lbl.grid(row =2, column=0,sticky="w")
                 self.longbreak_entry_lbl= Label(settings_window, text="Long Break Duration:", font=("Arial",18), bg="gray", fg="black")
@@ -556,7 +555,7 @@ class MainInterface:
                 self.longbreakseconds_entry.insert(0, "00")
 
     #REPEAT CYCLES ENTRYBOX
-                self.repeat_cycles_icon = PhotoImage(file=os.path.join(base_dir, "tomato cycle.png"))
+                self.repeat_cycles_icon = PhotoImage(file="tomato cycle.png")
                 self.repeat_cycles_img_lbl = Label(settings_window, image=self.repeat_cycles_icon,bg="gray")
                 self.repeat_cycles_img_lbl.grid(row =3, column=0,sticky="w")
                 self.repeat_cycles_lbl= Label(settings_window, text="Times to Repeat:", font=("Arial",18), bg="gray", fg="black")
@@ -566,12 +565,12 @@ class MainInterface:
                 self.repeat_cycles_entry.grid(row = 3, column=3, columnspan=1,sticky="w")
 
     #RESET PRESETS
-                self.reset_all_icon = PhotoImage(file=os.path.join(base_dir, "reset all.png"))
+                self.reset_all_icon = PhotoImage(file="reset all.png")
                 self.reset_all_btn=Button(settings_window,text="Reset ALL Presets",font=("Arial",13),compound="top", image=self.reset_all_icon, command=reset_default_mode,borderwidth=0,bg="gray", activebackground ="gray", highlightthickness=0)
                 self.reset_all_btn.grid(row=8,column=8,columnspan=2,rowspan=2,sticky="se")
 
     #ENDING SOUNDS COMBOBOX
-                self.sounds_icon = PhotoImage(file=os.path.join(base_dir, "sounds setting.png"))
+                self.sounds_icon = PhotoImage(file="sounds setting.png")
                 self.sounds_img_lbl = Label(settings_window, image=self.sounds_icon,bg="gray")
                 self.sounds_img_lbl.grid(row =4, column=0,sticky="w")
                 self.sounds_entry_lbl= Label(settings_window, text="Ending Sounds:", font=("Arial",18), bg="gray", fg="black")
@@ -602,7 +601,7 @@ class MainInterface:
                 self.selected_LB_sound = "Default Microwave LB"
 
     #BACKGROUND COLOR
-                self.backgroundcolor_icon = PhotoImage(file=os.path.join(base_dir, "bg color.png"))
+                self.backgroundcolor_icon = PhotoImage(file="bg color.png")
                 self.backgroundcolor_img_lbl = Label(settings_window, image=self.backgroundcolor_icon,bg="gray")
                 self.backgroundcolor_img_lbl.grid(row =5, column=0,sticky="w")
                 self.bg_color_lbl = Label(settings_window, text="Background Color:", font=("Arial",18), bg="gray", fg="black")
@@ -612,7 +611,7 @@ class MainInterface:
                 self.bg_color_btn.grid(row=5, column=3, columnspan=2, sticky="w")
 
     #VOLUME SLIDER
-                self.volume_icon = PhotoImage(file=os.path.join(base_dir, "volume.png"))
+                self.volume_icon = PhotoImage(file="volume.png")
                 self.volume_img_lbl = Label(settings_window, image=self.volume_icon,bg="gray")
                 self.volume_img_lbl.grid(row =6, column=0,sticky="w")
                 volume_label = Label(settings_window, text="Sound Volume:", font=("Arial", 18), bg="gray", fg="black")
@@ -622,60 +621,60 @@ class MainInterface:
                 self.volume_slider.set(self.volume)
                 self.volume_slider.grid(row=6, column=2, columnspan=3)
 
-                self.volume2_icon = PhotoImage(file=os.path.join(base_dir, "vol lbl.png"))
+                self.volume2_icon = PhotoImage(file="vol lbl.png")
                 self.volume_label = Label(settings_window,text="",image=self.volume2_icon,compound="left", font=("Courier New", 16,"bold"), fg="black", bg="gray")
                 self.volume_label.grid(row=6, column=5, columnspan=2, sticky="w")
 
     #PRESET 1 (SAVE AND LOAD)
-                self.preset1_icon = PhotoImage(file=os.path.join(base_dir, "preset 1.png"))
+                self.preset1_icon = PhotoImage(file="preset 1.png")
                 self.preset1_img_lbl = Label(settings_window, image=self.preset1_icon,bg="gray")
                 self.preset1_img_lbl.grid(row=7,column=0,sticky="w")
 
                 self.preset1_label = Label(settings_window, text="Preset 1:", font=("Arial", 18), bg="gray", fg="black")
                 self.preset1_label.grid(row=7, column=1, columnspan=2, sticky="w")
 
-                self.save_preset1_icon = PhotoImage(file=os.path.join(base_dir, "save preset1.png"))
+                self.save_preset1_icon = PhotoImage(file="save preset1.png")
 
                 self.save_preset1_btn=Button(settings_window, image=self.save_preset1_icon,bg="gray",command=save_preset1_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.save_preset1_btn.grid(row=7,column=3,columnspan=1,sticky="w")
 
-                self.load_preset1_icon = PhotoImage(file=os.path.join(base_dir, "load preset1.png"))
+                self.load_preset1_icon = PhotoImage(file="load preset1.png")
 
                 self.load_preset1_btn=Button(settings_window, image=self.load_preset1_icon,bg="gray",command=load_preset1_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.load_preset1_btn.grid(row=7,column=4,columnspan=1,sticky="w")
 
     #PRESET 2 (SAVE AND LOAD)
-                self.preset2_icon = PhotoImage(file=os.path.join(base_dir, "preset 2.png"))
+                self.preset2_icon = PhotoImage(file="preset 2.png")
                 self.preset2_img_lbl = Label(settings_window, image=self.preset2_icon,bg="gray")
                 self.preset2_img_lbl.grid(row=8,column=0,sticky="w")
 
                 self.preset2_label = Label(settings_window, text="Preset 2:", font=("Arial", 18), bg="gray", fg="black")
                 self.preset2_label.grid(row=8, column=1, columnspan=2, sticky="w")
 
-                self.save_preset2_icon = PhotoImage(file=os.path.join(base_dir, "save preset2.png"))
+                self.save_preset2_icon = PhotoImage(file="save preset2.png")
 
                 self.save_preset2_btn=Button(settings_window, image=self.save_preset2_icon,bg="gray",command=save_preset2_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.save_preset2_btn.grid(row=8,column=3,columnspan=1,sticky="w")
 
-                self.load_preset2_icon = PhotoImage(file=os.path.join(base_dir, "load preset2.png"))
+                self.load_preset2_icon = PhotoImage(file="load preset2.png")
 
                 self.load_preset2_btn=Button(settings_window, image=self.load_preset2_icon,bg="gray",command=load_preset2_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.load_preset2_btn.grid(row=8,column=4,columnspan=1,sticky="w")
 
     #PRESET 3 (SAVE AND LOAD)
-                self.preset3_icon = PhotoImage(file=os.path.join(base_dir, "preset 3.png"))
+                self.preset3_icon = PhotoImage(file="preset 3.png")
                 self.preset3_img_lbl = Label(settings_window, image=self.preset3_icon,bg="gray")
                 self.preset3_img_lbl.grid(row=9,column=0,sticky="w")
 
                 self.preset3_label = Label(settings_window, text="Preset 3:", font=("Arial", 18), bg="gray", fg="black")
                 self.preset3_label.grid(row=9, column=1, columnspan=2, sticky="w")
 
-                self.save_preset3_icon = PhotoImage(file=os.path.join(base_dir, "save preset3.png"))
+                self.save_preset3_icon = PhotoImage(file="save preset3.png")
 
                 self.save_preset3_btn=Button(settings_window, image=self.save_preset3_icon,bg="gray",command=save_preset3_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.save_preset3_btn.grid(row=9,column=3,columnspan=1,sticky="w")
 
-                self.load_preset3_icon = PhotoImage(file=os.path.join(base_dir, "load preset2.png"))
+                self.load_preset3_icon = PhotoImage(file="load preset3.png")
 
                 self.load_preset3_btn=Button(settings_window, image=self.load_preset3_icon,bg="gray",command=load_preset3_settings,borderwidth=0,activebackground ="gray", highlightthickness=0)
                 self.load_preset3_btn.grid(row=9,column=4,columnspan=1,sticky="w")
@@ -692,42 +691,42 @@ class MainInterface:
      #User Menu (Statistics, Achievements,Study List)
         user_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="User", menu=user_menu)
-        self.statistics_icon=PhotoImage(file=os.path.join(base_dir, "statistics.png"))
+        self.statistics_icon=PhotoImage(file="statistics.png")
         user_menu.add_command(label="Statistics",image=self.statistics_icon,compound="left", command=user_data)
-        self.achievements_icon=PhotoImage(file=os.path.join(base_dir, "achievements.png"))
+        self.achievements_icon=PhotoImage(file="achievements.png")
         user_menu.add_command(label="Achievements",image=self.achievements_icon,compound="left", command=badges_user)
         user_menu.add_separator()
-        self.studylist_icon=PhotoImage(file=os.path.join(base_dir, "studylist.png"))
+        self.studylist_icon=PhotoImage(file="studylist.png")
         user_menu.add_command(label="Study List",image=self.studylist_icon,compound="left", command=studylist_user)
 
     #Mode Menu (Default, Study, Relax)
         mode_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Mode", menu=mode_menu)
-        self.default_icon=PhotoImage(file=os.path.join(base_dir, "defaultmode.png"))
+        self.default_icon=PhotoImage(file="defaultmode.png")
         mode_menu.add_command(label="Default Mode",image=self.default_icon,compound="left", command=switch_default_mode)
         mode_menu.add_separator()
-        self.study_icon=PhotoImage(file=os.path.join(base_dir, "studymode.png"))
+        self.study_icon=PhotoImage(file="studymode.png")
         mode_menu.add_command(label="Study Mode",image=self.study_icon,compound="left", command=study_mode)
         mode_menu.add_separator()
-        self.relax_icon=PhotoImage(file=os.path.join(base_dir, "relaxmode.png"))
+        self.relax_icon=PhotoImage(file="relaxmode.png")
         mode_menu.add_command(label="Relax Mode",image=self.relax_icon,compound="left", command=relax_mode)
 
     #Settings Open(Open new settings window)
         setting_menu = Menu(menu_bar, tearoff = 0)
         menu_bar.add_cascade(label="Settings",menu=setting_menu)
-        self.opensettings_icon=PhotoImage(file=os.path.join(base_dir, "open settings.png"))
+        self.opensettings_icon=PhotoImage(file="open settings.png")
         setting_menu.add_command(label="Open",image=self.opensettings_icon,compound="left", command=open_settings)
 
     #Default Mode Buttons and Label
         self.timer_lbl = Label(root, text = "25:00", font= ("Digital-7", 150,), fg ="black", bg = "IndianRed")
 
         self.current_tomato_lbl = Label(root,text="Current\nCycles",font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
-        self.tomato_cycle_icon = PhotoImage(file=os.path.join(base_dir, "tomato cycle.png"))
+        self.tomato_cycle_icon = PhotoImage(file="tomato cycle.png")
         self.cycles_lbl = Label(root, text="",image=self.tomato_cycle_icon,compound="left", font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
 
-        self.start_icon = PhotoImage(file=os.path.join(base_dir, "start2.png"))
-        self.stop_icon = PhotoImage(file=os.path.join(base_dir, "stop.png"))
-        self.reset_icon = PhotoImage(file=os.path.join(base_dir, "repeat3.png"))
+        self.start_icon = PhotoImage(file="start2.png")
+        self.stop_icon = PhotoImage(file="stop.png")
+        self.reset_icon = PhotoImage(file="repeat3.png")
 
         self.default_start_btn = Button(root, image=self.start_icon,command =self.start_default_time, borderwidth=0,bg="indianred", activebackground ="indianred", highlightthickness=0, relief='flat')
         self.default_stop_btn = Button(root,image=self.stop_icon,command =self.pause_default_time,borderwidth=0,bg="indianred",activebackground ="indianred", highlightthickness=0, relief='flat')
@@ -747,9 +746,9 @@ class MainInterface:
         self.relax_stop_btn = Button(root,image=self.stop_icon,command =self.pause_relax_time,borderwidth=0,bg="mediumseagreen", activebackground ="mediumseagreen", highlightthickness=0, relief='flat')
         self.relax_reset_btn = Button(root,image=self.reset_icon,command =self.reset_relax_time,borderwidth=0,bg="mediumseagreen", activebackground ="mediumseagreen", highlightthickness=0, relief='flat')
 
-        self.timer_icon = PhotoImage(file=os.path.join(base_dir, "timer.png"))
-        self.shortbreak_icon = PhotoImage(file=os.path.join(base_dir, "short break.png"))
-        self.longbreak_icon = PhotoImage(file=os.path.join(base_dir, "long break.png"))
+        self.timer_icon = PhotoImage(file="timer.png")
+        self.shortbreak_icon = PhotoImage(file="short break.png")
+        self.longbreak_icon = PhotoImage(file="long break.png")
 
         self.session_type_img = Label(root, image=self.timer_icon,borderwidth=0,bg="indianred")
         self.session_type_lbl = Label(root, text="", font=("Courier New", 20,"bold"), fg="black", bg="IndianRed")
@@ -760,12 +759,12 @@ class MainInterface:
         self.relaxsession_type_img = Label(root, image=self.timer_icon,borderwidth=0,bg="mediumseagreen")
         self.relax_session_type_lbl = Label(root, text="", font=("Courier New", 20,"bold"), fg="black", bg="mediumseagreen") 
 
-        self.tomato_cycle_icon = PhotoImage(file=os.path.join(base_dir, "tomato cycle.png"))
+        self.tomato_cycle_icon = PhotoImage(file="tomato cycle.png")
         self.cycles_lbl = Label(root, text="",image=self.tomato_cycle_icon,compound="left", font=("Times", 16), fg="black", bg="IndianRed")
     
 # Add background music button
-        self.music_on_icon = PhotoImage(file=os.path.join(base_dir, "music on.png"))
-        self.music_off_icon = PhotoImage(file=os.path.join(base_dir, "music off.png"))
+        self.music_on_icon = PhotoImage(file="music on.png")
+        self.music_off_icon = PhotoImage(file="music off.png")
         self.music_btn = Button(root,image=self.music_on_icon,command=self.toggle_music,borderwidth=0,bg="indianred", activebackground ="indianred", highlightthickness=0, relief='flat')
 
 #Main Interface to show Default Mode first
@@ -784,10 +783,10 @@ class MainInterface:
         self.default_longbreak_duration = 900   # Default long break duration in seconds
 
         self.timer_type = "default_timer"
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.default_timer_sound = os.path.join(base_dir,"Default Timer Alarm.wav")
-        self.default_short_break_sound = os.path.join(base_dir,"Default SB.wav")
-        self.default_long_break_sound = os.path.join(base_dir,"Default Microwave LB.wav")
+
+        self.default_timer_sound = "Default Timer Alarm.wav"
+        self.default_short_break_sound = "Default SB.wav"
+        self.default_long_break_sound = "Default Microwave LB.wav"
 
         self.number_cycles = 0  # Initialize number of cycles to zero
         self.current_cycle = 0  #Current cycles is zero
@@ -795,13 +794,12 @@ class MainInterface:
 
 #Music Button Toggle ON/OFF
     def toggle_music(self):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
         if self.is_music_playing:
             pygame.mixer.music.stop()
             self.is_music_playing = False
             self.music_btn.config(image=self.music_on_icon)
         else:
-            pygame.mixer.music.load(os.path.join(base_dir,"Autumn Garden.mp3"))  # Replace with your background music file
+            pygame.mixer.music.load("Autumn Garden.mp3")  # Replace with your background music file
             pygame.mixer.music.play(-1)  # Play the music indefinitely
             self.is_music_playing = True
             self.music_btn.config(image=self.music_off_icon)
@@ -893,7 +891,7 @@ class MainInterface:
                 self.alarm_sound(self.timer_type)
 
                 # Calculate cumulative time and check for achievements
-                self.cumulative_time += self.default_timer_duration  # Adjust based on session type
+                self.cumulative_time += self.default_timer_duration / 60  # Convert to minutes
                 self.check_achievements()
 
                 if self.timer_type == "default_timer":
@@ -905,7 +903,7 @@ class MainInterface:
 
                 # Wait for the sound to finish before starting the next session
                 sound_length = pygame.mixer.Sound(self.timer_end_sound).get_length() * 1000  # Convert seconds to milliseconds
-                self.root.after(int(sound_length), self.start_cycle) 
+                self.root.after(int(sound_length), self.start_cycle)
                 self.update_default_display()
                 # Update cycle count label
                 self.update_cycle_count_label()
@@ -976,8 +974,8 @@ class MainInterface:
         self.display_badge(badge_path)
 
     def display_badge(self, badge_path):
-        badge_window = Toplevel(root)
-        badge_window.title(f"{badge_path}")
+        badge_window = Toplevel(self.root)
+        badge_window.title("Achievement Unlocked")
         
         badge_image_tk = PhotoImage(file=badge_path)
         
@@ -999,11 +997,11 @@ class MainInterface:
 
         self.study_type = "study_timer"
         self.study_cycle_count = 0
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+
         #Load sounds
-        self.study_timer_sound = pygame.mixer.Sound(os.path.join(base_dir,"Study Referee Alarm.wav"))
-        self.study_shortbreak_sound = pygame.mixer.Sound(os.path.join(base_dir,"Study Churchbell SB.wav"))
-        self.study_longbreak_sound = pygame.mixer.Sound(os.path.join(base_dir,"Study Great Harp LB.wav"))
+        self.study_timer_sound = pygame.mixer.Sound("Study Referee Alarm.wav")
+        self.study_shortbreak_sound = pygame.mixer.Sound("Study Churchbell SB.wav")
+        self.study_longbreak_sound = pygame.mixer.Sound("Study Great Harp LB.wav")
 
 
 ##STUDY MODE
@@ -1127,11 +1125,11 @@ class MainInterface:
 
         self.relax_type = "relax_timer"
         self.relax_cycle_count = 0
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+
         #Load sounds
-        self.relax_timer_sound = pygame.mixer.Sound(os.path.join(base_dir,"Relax Chime Alarm.wav"))
-        self.relax_shortbreak_sound = pygame.mixer.Sound(os.path.join(base_dir,"Relax WindChimes SB.wav"))
-        self.relax_longbreak_sound = pygame.mixer.Sound(os.path.join(base_dir,"Relax Harp LB.wav"))
+        self.relax_timer_sound = pygame.mixer.Sound("Relax Chime Alarm.wav")
+        self.relax_shortbreak_sound = pygame.mixer.Sound("Relax WindChimes SB.wav")
+        self.relax_longbreak_sound = pygame.mixer.Sound("Relax Harp LB.wav")
 
 ##RELAX
     def relaxmode_timer(self): #15 mins
