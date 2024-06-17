@@ -4,7 +4,7 @@ A simple Pomodoro timer application built with Tkinter.
 
 ## Download
 
-You can download the latest release [here] (https://github.com/huiwen0221/GitExercise-TT6L10/releases/tag/pomodoro)
+You can download the latest release [here] (https://github.com/huiwen0221/GitExercise-TT6L10/releases/tag/tkinter)
 
 ## Usage
 
