@@ -715,7 +715,7 @@ class MainInterface:
             self.update_cycle_count_label()
             
             self.update_default_display()
-            self.cycles_lbl.config(text="Cycles: {}".format(repeat_cycles))
+            self.cycles_lbl.config(text=": {}".format(repeat_cycles))
             volume = self.volume_slider.get()
 
             # Check if the preset already exists
