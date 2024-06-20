@@ -567,7 +567,6 @@ class MainInterface:
             self.due_date_selected = False
             self.due_time_selected = False
 
-              
 #Change to Default Mode
         def switch_default_mode():
             root.config(bg="IndianRed")
@@ -651,6 +650,8 @@ class MainInterface:
             self.cycles_lbl.configure(bg=new_bg_color)
             self.session_type_img.configure(bg=new_bg_color)
             self.session_type_lbl.configure(bg=new_bg_color)
+            self.current_tomato_lbl.configure(bg=new_bg_color)
+            self.music_btn.configure(bg=new_bg_color)
             self.background_color = new_bg_color
 
         def update_volume(val):
@@ -797,6 +798,14 @@ class MainInterface:
                 self.timer_lbl.configure(bg=background_color)
                 self.cycles_lbl.configure(bg=background_color)
                 self.session_type_lbl.configure(bg=background_color)
+                self.session_type_img.configure(bg=background_color)
+                self.current_tomato_lbl.configure(bg=background_color)
+                self.music_btn.configure(bg=background_color)
+                self.default_start_btn.configure(bg=background_color)
+                self.default_stop_btn.configure(bg=background_color)
+                self.default_reset_btn.configure(bg=background_color)
+
+
                 self.update_cycle_count_label()
                 self.update_default_display()
                 # Apply volume to volume slider
