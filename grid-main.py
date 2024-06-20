@@ -827,7 +827,7 @@ class MainInterface:
             self.number_cycles= 0
             self.current_cycle = 0
             self.update_cycle_count_label()
-            self.cycles_lbl.config(text="Cycles: 0")
+            self.cycles_lbl.config(text=": 0")
 
             self.timer_entry.delete(0,END)
             self.timer_entry.insert(0,"25")
@@ -847,6 +847,13 @@ class MainInterface:
             self.timer_lbl.configure(bg="IndianRed")
             self.cycles_lbl.configure(bg="IndianRed")
             self.session_type_lbl.configure(bg="IndianRed")
+            self.default_start_btn.configure(bg="IndianRed")
+            self.default_stop_btn.configure(bg="IndianRed")
+            self.default_reset_btn.configure(bg="IndianRed")
+            self.music_btn.configure(bg="IndianRed")
+            self.session_type_img.configure(bg="IndianRed")
+            self.current_tomato_lbl.configure(bg="IndianRed")
+            self.music_btn.configure(bg="IndianRed")
 
             self.alarm_sound_combobox.set("Default Alarm")
             self.SB_sound_combobox.set("Default Short Break")
@@ -869,7 +876,7 @@ class MainInterface:
                 if row:
                     # Unpack the row into variables
                     (timer_duration, shortbreak_duration, longbreak_duration, repeat_cycles,
-                    timer_end_sound, short_break_sound, long_break_sound, background_color, volume) = row
+                    timer_end_sound, short_break_sound, long_break_sound, self.background_color, volume) = row
 
                     # Update the preset with the original default values
                     self.cursor.execute("""UPDATE Presets SET
