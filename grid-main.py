@@ -220,57 +220,63 @@ class MainInterface:
                         self.conn.commit()
             
             def add_task():
-                            new_task = self.new_task_entry.get()
-                            if new_task and self.selected_date and self.selected_time:
-                                add_task_to_study_list(new_task, self.selected_date, self.selected_time)
-                                self.new_task_entry.delete(0, "end")
-                                self.selected_date = None
-                                self.selected_time = None
-                            else:
-                                messagebox.showwarning("Warning", "Please enter a task, select its due date, and set the time.")
+                new_task = self.new_task_entry.get()
+                if new_task and self.selected_date and self.selected_time:
+                    add_task_to_study_list(new_task, self.selected_date, self.selected_time)
+                    self.new_task_entry.delete(0, "end")
+                    self.selected_date = None
+                    self.selected_time = None
+
+                    # Re-enable the due date and due time buttons
+                    self.due_date_button.config(state=NORMAL)
+                    self.due_time_button.config(state=NORMAL)
+                else:
+                    messagebox.showwarning("Warning", "Please enter a task, select its due date, and set the time.")
 
 
             def add_task_to_study_list(new_task, due_date, due_time, from_db=False):
-                            task_row = self.task_count + 2
+                task_row = self.task_count + 2
 
-                            # Checkbutton for new task
-                            task_checkbutton = Checkbutton(self.study_frame, text=new_task, font=("Times New Roman", 20), bg="white")
-                            task_checkbutton.grid(row=task_row, column=0, sticky="w", pady=(5, 0))
+                # Checkbutton for new task
+                task_checkbutton = Checkbutton(self.study_frame, text=new_task, font=("Times New Roman", 20), bg="white")
+                task_checkbutton.grid(row=task_row, column=0, sticky="w", pady=(5, 0))
 
-                            task_checkbutton.var = BooleanVar()
-                            task_checkbutton.config(variable=task_checkbutton.var, command=lambda cb=task_checkbutton, tt=new_task, dt=due_date, tm=due_time: mark_completed(cb, tt, dt, tm))
+                task_checkbutton.var = BooleanVar()
+                task_checkbutton.config(variable=task_checkbutton.var, command=lambda cb=task_checkbutton, tt=new_task, dt=due_date, tm=due_time: mark_completed(cb, tt, dt, tm))
 
-                            # Frame to hold due date and due time
-                            due_info_frame = Frame(self.study_frame, bg="light yellow")
-                            due_info_frame.grid(row=task_row, column=1, sticky="ew", padx=20, pady=(5, 0), columnspan=2)
+                # Frame to hold due date and due time
+                due_info_frame = Frame(self.study_frame, bg="light yellow")
+                due_info_frame.grid(row=task_row, column=1, sticky="ew", padx=20, pady=(5, 0), columnspan=2)
 
-                            # Frame to hold both due date and due time in the same box
-                            due_date_time_frame = Frame(due_info_frame, bd=1, relief=SOLID, bg="light yellow")
-                            due_date_time_frame.pack(side="left", padx=5, fill=X, expand=True)
+                # Frame to hold both due date and due time in the same box
+                due_date_time_frame = Frame(due_info_frame, bd=1, relief=SOLID, bg="light yellow")
+                due_date_time_frame.pack(side="left", padx=5, fill=X, expand=True)
 
-                            # Due date label
-                            due_date_label = Label(due_date_time_frame, text=f"Due Date: {due_date}", font=("Times New Roman", 10), bg="light yellow")
-                            due_date_label.pack(padx=5, pady=2)
+                # Due date label
+                due_date_label = Label(due_date_time_frame, text=f"Due Date: {due_date}", font=("Times New Roman", 10), bg="light yellow")
+                due_date_label.pack(padx=5, pady=2)
 
-                            # Due time label
-                            due_time_label = Label(due_date_time_frame, text=f"Due Time: {due_time}", font=("Times New Roman", 10), bg="light yellow")
-                            due_time_label.pack(padx=5, pady=2)
+                # Due time label
+                due_time_label = Label(due_date_time_frame, text=f"Due Time: {due_time}", font=("Times New Roman", 10), bg="light yellow")
+                due_time_label.pack(padx=5, pady=2)
 
+                self.task_widgets.append((task_checkbutton, due_info_frame))
 
+                self.task_count += 1
+                self.task_count_label.config(text=f"Number of tasks: {self.task_count}")
 
-                            self.task_widgets.append((task_checkbutton, due_info_frame))
+                if due_date not in self.calendar_tasks:
+                    self.calendar_tasks[due_date] = []
+                self.calendar_tasks[due_date].append((new_task, due_time))
 
-                            self.task_count += 1
-                            self.task_count_label.config(text=f"Number of tasks: {self.task_count}")
+                if not from_db:
+                    self.save_task(new_task, due_date, due_time)
 
-                            if due_date not in self.calendar_tasks:
-                                self.calendar_tasks[due_date] = []
-                                self.calendar_tasks[due_date].append((new_task, due_time))
-
-                            if not from_db:
-                                self.save_task(new_task, due_date, due_time)
-
-                            schedule_notification(new_task, due_date, due_time)
+                schedule_notification(new_task, due_date, due_time)
+                
+                # Re-enable the due date and due time buttons
+                self.due_date_button.config(state=NORMAL)
+                self.due_time_button.config(state=NORMAL)
 
             def update_task_count_label():
                 self.task_count_label.config(text=f"Number of tasks: {self.task_count}")
@@ -517,9 +523,9 @@ class MainInterface:
             create_table()
             add_completed_column() 
             load_tasks()
+            update_task_count_label()
 
-
-                
+            
             self.calendar_button = Button(study, text="Calendar", command=open_calendar, bg="white")
             self.calendar_button.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
 
@@ -1669,7 +1675,7 @@ class MainInterface:
                 task, due_date, due_time = task_info
                 # Add task to your application logic here
                 print(f"Loaded task: {task} due on {due_date} at {due_time}")
-                add_task_to_study_list(task, due_date, due_time, from_db=True)  # Call add_task_to_study_list with from_db=True
+                self.add_task_to_study_list(task, due_date, due_time, from_db=True)  # Call add_task_to_study_list with from_db=True
         except Exception as e:
             print(f"Error loading tasks: {e}")
 
